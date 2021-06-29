@@ -4,7 +4,7 @@ private let transactionSigner: TransactionSignable = SignTransactionWorker()
 private let messageDecrypter: MessageDecryptable = MessageDecryptionWorker()
 private let jwtCreator: JWTCreatable = JWTCreator()
 
-public func login(with accessLevel: Int) throws {
+public func login(with accessLevel: AccessLevel) throws {
     presentAuthSession()
 }
 
