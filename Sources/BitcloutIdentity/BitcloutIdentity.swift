@@ -5,7 +5,7 @@ private let messageDecrypter: MessageDecryptable = MessageDecryptionWorker()
 private let jwtCreator: JWTCreatable = JWTCreator()
 
 public func login(with accessLevel: AccessLevel) throws {
-    presentAuthSession()
+    presentAuthSession(accessLevel: accessLevel)
 }
 
 public func logout(_ publicKey: String) throws {

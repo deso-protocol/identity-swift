@@ -8,11 +8,14 @@
 import Foundation
 import AuthenticationServices
 
-func presentAuthSession() {
-    let session = ASWebAuthenticationSession(url: URL(string: "https://identity.bitclout.com/v0/native-auth")!,
+func presentAuthSession(accessLevel: AccessLevel) {
+    let session = ASWebAuthenticationSession(url: URL(string: "https://identity.bitclout.com/log-in?accessLevelRequest=\(accessLevel.rawValue)&webview=true")!,
                                              callbackURLScheme: "bitcloutid") { url, error in
         // TODO: get the auth information here and store it in the keychain (or wherever is appropriate)
-        print(url)
+        print(url?.absoluteString ?? "NO URL returned")
+        if let error = error {
+            print(error.localizedDescription)
+        }
     }
     session.prefersEphemeralWebBrowserSession = false
     session.start()
