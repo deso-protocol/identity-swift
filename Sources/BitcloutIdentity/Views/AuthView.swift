@@ -8,7 +8,7 @@
 import Foundation
 import AuthenticationServices
 
-func presentAuthSession(accessLevel: AccessLevel) {
+func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvider) {
     let session = ASWebAuthenticationSession(url: URL(string: "https://identity.bitclout.com/log-in?accessLevelRequest=\(accessLevel.rawValue)&webview=true")!,
                                              callbackURLScheme: "bitcloutid") { url, error in
         // TODO: get the auth information here and store it in the keychain (or wherever is appropriate)
@@ -17,6 +17,7 @@ func presentAuthSession(accessLevel: AccessLevel) {
             print(error.localizedDescription)
         }
     }
+    session.presentationContextProvider = context
     session.prefersEphemeralWebBrowserSession = false
     session.start()
 }

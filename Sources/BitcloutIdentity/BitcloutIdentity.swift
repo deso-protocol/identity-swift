@@ -3,9 +3,14 @@ import AuthenticationServices
 private let transactionSigner: TransactionSignable = SignTransactionWorker()
 private let messageDecrypter: MessageDecryptable = MessageDecryptionWorker()
 private let jwtCreator: JWTCreatable = JWTCreator()
+private var context: PresentationContextProvider!
 
 public func login(with accessLevel: AccessLevel) throws {
-    presentAuthSession(accessLevel: accessLevel)
+    guard let window = UIApplication.shared.windows.first else {
+        throw IdentityError.missingPresentationAnchor
+    }
+    context = PresentationContextProvider(anchor: window)
+    presentAuthSession(accessLevel: accessLevel, context: context)
 }
 
 public func logout(_ publicKey: String) throws {
