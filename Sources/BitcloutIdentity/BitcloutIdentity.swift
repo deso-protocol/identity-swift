@@ -1,23 +1,11 @@
 import AuthenticationServices
 
-struct BitcloutIdentity {
-    var contextProvider: ASWebAuthenticationPresentationContextProviding
-}
-
-private var state: BitcloutIdentity?
 private let transactionSigner: TransactionSignable = SignTransactionWorker()
 private let messageDecrypter: MessageDecryptable = MessageDecryptionWorker()
 private let jwtCreator: JWTCreatable = JWTCreator()
 
-public func initialize(_ viewController: UIViewController) {
-    state = BitcloutIdentity(contextProvider: viewController)
-}
-
 public func login(with accessLevel: Int) throws {
-    guard let state = state else {
-        throw IdentityError.missingPresentationAnchor
-    }
-    presentAuthSession(state.contextProvider)
+    presentAuthSession()
 }
 
 public func logout(_ publicKey: String) throws {

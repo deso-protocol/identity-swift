@@ -8,6 +8,5 @@
 import Foundation
 
 public enum IdentityError: Swift.Error {
-    case missingPresentationAnchor
     case notLoggedIn
 }

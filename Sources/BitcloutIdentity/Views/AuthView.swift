@@ -8,12 +8,12 @@
 import Foundation
 import AuthenticationServices
 
-func presentAuthSession(_ contextProvider: ASWebAuthenticationPresentationContextProviding) {
+func presentAuthSession() {
     let session = ASWebAuthenticationSession(url: URL(string: "https://identity.bitclout.com/v0/native-auth")!,
                                              callbackURLScheme: "bitcloutid") { url, error in
         // TODO: get the auth information here and store it in the keychain (or wherever is appropriate)
+        print(url)
     }
-    session.presentationContextProvider = contextProvider
     session.prefersEphemeralWebBrowserSession = false
     session.start()
 }
