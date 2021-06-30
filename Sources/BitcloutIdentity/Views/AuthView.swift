@@ -9,8 +9,8 @@ import Foundation
 import AuthenticationServices
 
 func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvider) {
-    let session = ASWebAuthenticationSession(url: URL(string: "https://identity.bitclout.com/log-in?accessLevelRequest=\(accessLevel.rawValue)&webview=true")!,
-                                             callbackURLScheme: "bitcloutid") { url, error in
+    let session = ASWebAuthenticationSession(url: URL(string: "http://localhost:3000")!,
+                                             callbackURLScheme: "identity") { url, error in
         // TODO: get the auth information here and store it in the keychain (or wherever is appropriate)
         print(url?.absoluteString ?? "NO URL returned")
         if let error = error {
