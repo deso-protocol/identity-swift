@@ -8,10 +8,10 @@
 import Foundation
 
 public struct DerivedKeyInfo: Codable {
-    let truePublicKey: String
-    let newPublicKey: String
-    let newPrivateKey: String
-    let signedHash: String
+    public let truePublicKey: String
+    public let newPublicKey: String
+    public let newPrivateKey: String
+    public let signedHash: String
 }
 
 extension DerivedKeyInfo {
