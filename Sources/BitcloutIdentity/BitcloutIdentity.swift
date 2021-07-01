@@ -1,5 +1,7 @@
 import AuthenticationServices
 
+private let authWorker: Authable = AuthWorker()
+private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
 private let transactionSigner: TransactionSignable = SignTransactionWorker()
 private let messageDecrypter: MessageDecryptable = MessageDecryptionWorker()
 private let jwtCreator: JWTCreatable = JWTCreator()
@@ -10,24 +12,29 @@ public func login(with accessLevel: AccessLevel) throws {
         throw IdentityError.missingPresentationAnchor
     }
     context = PresentationContextProvider(anchor: window)
-    presentAuthSession(accessLevel: accessLevel, context: context)
+    authWorker.presentAuthSession(accessLevel: accessLevel, context: context)
 }
 
-public func logout(_ publicKey: String) throws {
-    // TODO: remove stored information for specified public key
+public func logout(_ publicKey: String) {
+    keyStore.clearDerivedKeyInfo(for: publicKey)
+}
+
+public func removeAllKeys() {
+    keyStore.clearAllDerivedKeyInfo()
 }
 
 public func sign(_ transaction: UnsignedTransaction) throws -> String {
     // TODO: Check if logged in and throw error if not
-    return transactionSigner.signTransaction(transaction)
+    return try transactionSigner.signTransaction(transaction)
 }
 
 public func decrypt(_ messages: EncryptedMessages) throws -> [String] {
     // TODO: Check if logged in and throw error if not
-    return messageDecrypter.decryptMessages(messages)
+    return try messageDecrypter.decryptMessages(messages)
 }
 
 public func jwt(_ request: JWTRequest) throws -> String {
     // TODO: Check if logged in and throw error if not
-    return jwtCreator.createJwt(request)
+    return try jwtCreator.createJwt(request)
 }
+

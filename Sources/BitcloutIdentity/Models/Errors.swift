@@ -10,4 +10,6 @@ import Foundation
 public enum IdentityError: Swift.Error {
     case missingPresentationAnchor
     case notLoggedIn
+    case missingInfoForPublicKey
+    case keyInfoExpired
 }
