@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DerivedKeyInfo.swift
 //  
 //
 //  Created by Andy Boyd on 30/06/2021.
@@ -7,6 +7,7 @@
 
 import Foundation
 
+// TODO: Confirm this. Does it need more info, e.g. the access level?
 public struct DerivedKeyInfo: Codable {
     public let truePublicKey: String
     public let newPublicKey: String
@@ -16,6 +17,7 @@ public struct DerivedKeyInfo: Codable {
 
 extension DerivedKeyInfo {
     init?(_ query: [URLQueryItem]) {
+        // TODO: Confirm with Identity web app if this matches how the data will be returned from the auth session
         guard let truePubKey = query.first(where: { $0.name == "truePublicKey" })?.value,
               let newPubKey = query.first(where: { $0.name == "newPublicKey" })?.value,
               let newPrivateKey = query.first(where: { $0.name == "newPrivateKey" })?.value,

@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  AuthWorker.swift
 //  
 //
 //  Created by Andy Boyd on 29/06/2021.
@@ -16,6 +16,7 @@ class AuthWorker: Authable {
     private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
     func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvider) {
+        // TODO: Confirm the correct URL and callback URL scheme. Obviously localhost will not work 😂
         let session = ASWebAuthenticationSession(url: URL(string: "http://localhost:3000")!,
                                                  callbackURLScheme: "identity") { url, error in
             guard let url = url else {
