@@ -15,12 +15,12 @@ public func login(with accessLevel: AccessLevel) throws {
     authWorker.presentAuthSession(accessLevel: accessLevel, context: context)
 }
 
-public func logout(_ publicKey: String) {
-    keyStore.clearDerivedKeyInfo(for: publicKey)
+public func logout(_ publicKey: String) throws {
+    try keyStore.clearDerivedKeyInfo(for: publicKey)
 }
 
-public func removeAllKeys() {
-    keyStore.clearAllDerivedKeyInfo()
+public func removeAllKeys() throws {
+    try keyStore.clearAllDerivedKeyInfo()
 }
 
 public func sign(_ transaction: UnsignedTransaction) throws -> String {
