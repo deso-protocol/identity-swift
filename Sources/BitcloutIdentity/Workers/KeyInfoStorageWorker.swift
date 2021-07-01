@@ -19,6 +19,7 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         case derivedKeyInfo
     }
     
+    // TODO: Switch this to keychain to store securely
     let defaults = UserDefaults.standard
     
     func store(_ info: DerivedKeyInfo) throws {
