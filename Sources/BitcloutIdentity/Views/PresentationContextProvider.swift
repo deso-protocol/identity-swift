@@ -8,7 +8,9 @@
 import Foundation
 import AuthenticationServices
 
-class PresentationContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
+protocol PresentationContextProvidable: ASWebAuthenticationPresentationContextProviding {}
+
+class PresentationContextProvider: NSObject, PresentationContextProvidable {
     private let anchor: ASPresentationAnchor
     
     init(anchor: ASPresentationAnchor) {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct JWTRequest {
+public struct JWTRequest: Equatable {
     let accessLevel: AccessLevel
     let accessLevelHmac: String
     let encryptedSeedHex: String

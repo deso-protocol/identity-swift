@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct UnsignedTransaction {
+public struct UnsignedTransaction: Equatable {
     let accessLevel: AccessLevel
     let accessLevelHmac: String
     let encryptedSeedHex: String

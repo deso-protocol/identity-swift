@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct EncryptedMessages {
+public struct EncryptedMessages: Equatable {
     let accessLevel: AccessLevel
     let accessLevelHmac: String
     let encryptedSeedHex: String
