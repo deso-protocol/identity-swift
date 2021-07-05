@@ -9,13 +9,13 @@ import Foundation
 import AuthenticationServices
 
 protocol Authable {
-    func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvidable)
+    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?)
 }
 
 class AuthWorker: Authable {
     private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
-    func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvidable) {
+    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
         // TODO: Confirm the correct URL and callback URL scheme. Obviously localhost will not work 😂
         let session = ASWebAuthenticationSession(url: URL(string: "http://localhost:3000")!,
                                                  callbackURLScheme: "identity") { url, error in
@@ -32,8 +32,11 @@ class AuthWorker: Authable {
             }
             do {
                 try self.keyStore.store(keyData)
+                let allKeys = try self.keyStore.getAllStoredKeys()
+                completion?(allKeys, nil)
             } catch {
                 print(error.localizedDescription)
+                completion?(nil, error)
             }
         }
         session.presentationContextProvider = context

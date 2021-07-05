@@ -13,6 +13,7 @@ public struct DerivedKeyInfo: Codable {
     public let newPublicKey: String
     public let newPrivateKey: String
     public let signedHash: String
+    public let jwt: String
 }
 
 extension DerivedKeyInfo {
@@ -21,7 +22,8 @@ extension DerivedKeyInfo {
         guard let truePubKey = query.first(where: { $0.name == "truePublicKey" })?.value,
               let newPubKey = query.first(where: { $0.name == "newPublicKey" })?.value,
               let newPrivateKey = query.first(where: { $0.name == "newPrivateKey" })?.value,
-              let signedHash = query.first(where: { $0.name == "signedHash" })?.value else {
+              let signedHash = query.first(where: { $0.name == "signedHash" })?.value,
+              let jwt = query.first(where: { $0.name == "jwt" })?.value else {
             return nil
         }
         
@@ -29,5 +31,6 @@ extension DerivedKeyInfo {
         self.newPublicKey = newPubKey
         self.newPrivateKey = newPrivateKey
         self.signedHash = signedHash
+        self.jwt = jwt
     }
 }

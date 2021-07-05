@@ -10,11 +10,10 @@ import Foundation
 
 class MockAuthWorker: Authable {
     var calledPresentAuthSession: Bool = false
-    var accessLevelRequested: AccessLevel?
     var contextProvided: PresentationContextProvidable?
-    func presentAuthSession(accessLevel: AccessLevel, context: PresentationContextProvidable) {
+    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
         calledPresentAuthSession = true
-        accessLevelRequested = accessLevel
         contextProvided = context
+        completion?(nil, nil)
     }
 }

@@ -7,14 +7,14 @@
 
 import Foundation
 
-protocol JWTCreatable {
+protocol JWTFetchable {
     // TODO: Confirm interface. Might need something more to specify the public key to use
-    func createJwt(_ request: JWTRequest) throws -> String
+    func getJWT(for publicKey: String) throws -> String
 }
 
-class JWTCreator: JWTCreatable {
-    func createJwt(_ request: JWTRequest) throws -> String {
-        // TODO: Actually create the JWT and return it
+class JWTWorker: JWTFetchable {
+    func getJWT(for publicKey: String) throws -> String {
+        // TODO: Actually fetch the JWT and return it, or throw an error if there is no jwt for this public key
         return ""
     }
 }

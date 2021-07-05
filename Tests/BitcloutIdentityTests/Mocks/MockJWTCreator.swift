@@ -8,13 +8,13 @@
 import Foundation
 @testable import BitcloutIdentity
 
-class MockJWTCreator: JWTCreatable {
+class MockJWTCreator: JWTFetchable {
     var mockJWT = "foobarJWT"
-    var calledCreateJWT: Bool = false
-    var jwtRequest: JWTRequest?
-    func createJwt(_ request: JWTRequest) throws -> String {
-        calledCreateJWT = true
-        jwtRequest = request
+    var calledGetJWT: Bool = false
+    var publicKeyToGetJWTFor: String?
+    func getJWT(for publicKey: String) throws -> String {
+        calledGetJWT = true
+        publicKeyToGetJWTFor = publicKey
         return mockJWT
     }
 }
