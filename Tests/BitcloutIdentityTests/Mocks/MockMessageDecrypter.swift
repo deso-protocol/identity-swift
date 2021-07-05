@@ -9,12 +9,12 @@ import Foundation
 @testable import BitcloutIdentity
 
 class MockMessageDecrypter: MessageDecryptable {
-    var mockDecryptedMessages = ["foo", "bar", "bat"]
+    var mockDecryptedMessages = ["foo": ["bar"], "bar": ["bat"], "bat": ["foo"]]
     var calledDecryptMessages: Bool = false
-    var messagesToDecrypt: EncryptedMessages?
-    func decryptMessages(_ encryptedMessages: EncryptedMessages) throws -> [String] {
+    var messagesToDecrypt: [EncryptedMessagesThread]?
+    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]] {
         calledDecryptMessages = true
-        messagesToDecrypt = encryptedMessages
+        messagesToDecrypt = encryptedMessageThreads
         return mockDecryptedMessages
     }
 }

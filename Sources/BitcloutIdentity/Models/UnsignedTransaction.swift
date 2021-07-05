@@ -8,8 +8,6 @@
 import Foundation
 
 public struct UnsignedTransaction: Equatable {
-    let accessLevel: AccessLevel
-    let accessLevelHmac: String
-    let encryptedSeedHex: String
+    let publicKey: String
     let transactionHex: String
 }

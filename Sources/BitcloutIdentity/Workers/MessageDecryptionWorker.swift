@@ -9,12 +9,14 @@ import Foundation
 
 protocol MessageDecryptable {
     // TODO: confirm interface. May need a public key/other crypto info passed as well
-    func decryptMessages(_ encryptedMessages: EncryptedMessages) throws -> [String]
+    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]]
 }
 
 class MessageDecryptionWorker: MessageDecryptable {
-    func decryptMessages(_ encryptedMessages: EncryptedMessages) throws -> [String] {
+    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]] {
         // TODO: Actually decrypt the messages
-        return encryptedMessages.encryptedMessages
+        return encryptedMessageThreads.reduce(into: [:], { res, this in
+            res[this.publicKey] = this.encryptedMessages
+        })
     }
 }
