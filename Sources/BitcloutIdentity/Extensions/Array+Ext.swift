@@ -16,3 +16,9 @@ extension Array {
         }
     }
 }
+
+extension Array where Element == UInt8 {
+    var stringValue: String? {
+        return String(bytes: self, encoding: .utf8)
+    }
+}
