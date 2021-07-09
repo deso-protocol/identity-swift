@@ -13,3 +13,15 @@ public enum IdentityError: Swift.Error {
     case missingInfoForPublicKey
     case keyInfoExpired
 }
+
+enum CryptoError: Swift.Error {
+    case badPrivateKey
+    case badPublicKey
+    case badSignature
+    case couldNotGetPublicKey
+    case emptyMessage
+    case messageTooLong
+    case couldNotGenerateRandomBytes(status: OSStatus)
+    case invalidCipherText
+    case incorrectMAC
+}

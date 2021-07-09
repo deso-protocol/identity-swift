@@ -2,12 +2,48 @@
   "object": {
     "pins": [
       {
+        "package": "ASN1",
+        "repositoryURL": "https://github.com/leif-ibsen/ASN1",
+        "state": {
+          "branch": null,
+          "revision": "53e0b34a34f882386e09d10d6d00bb7e969e307f",
+          "version": "1.2.1"
+        }
+      },
+      {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/leif-ibsen/BigInt",
+        "state": {
+          "branch": null,
+          "revision": "56a12cb278293d8e6bec91df6a1e5265e294d6ce",
+          "version": "1.2.5"
+        }
+      },
+      {
+        "package": "CryptoSwift",
+        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "4e31051c63cc0ddf10a25cf5318856c510cf77f4",
+          "version": "1.4.0"
+        }
+      },
+      {
         "package": "KeychainAccess",
         "repositoryURL": "https://github.com/kishikawakatsumi/KeychainAccess.git",
         "state": {
           "branch": null,
           "revision": "84e546727d66f1adc5439debad16270d0fdd04e7",
           "version": "4.2.2"
+        }
+      },
+      {
+        "package": "SwiftECC",
+        "repositoryURL": "https://github.com/leif-ibsen/SwiftECC",
+        "state": {
+          "branch": null,
+          "revision": "621c70126966e5c289c4dc0ff801c6282b6baa05",
+          "version": "1.0.2"
         }
       }
     ]
