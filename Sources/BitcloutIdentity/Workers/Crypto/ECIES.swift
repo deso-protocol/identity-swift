@@ -9,7 +9,11 @@ import Foundation
 import Security
 
 import CryptoSwift
-import secp256k1_implementation
+import SwiftECC
+import BigInt
+import ASN1
+
+private let ec = Domain.instance(curve: .EC256k1)
 
 func randomBytes(count: Int) throws -> [UInt8] {
     var bytes = [UInt8](repeating: 0, count: count)
@@ -74,8 +78,9 @@ func hmacSha256Sign(key: [UInt8], msg: [UInt8]) throws -> [UInt8] {
  */
 func getPublicKey(from privateKey: [UInt8]) throws -> [UInt8] {
     guard privateKey.count == 32 else { throw CryptoError.badPrivateKey }
-    let privKey = try secp256k1.Signing.PrivateKey(rawRepresentation: privateKey)
-    return privKey.publicKey.rawRepresentation.bytes
+    let privKey = try ECPrivateKey(der: privateKey)
+    let pubKey = ec.multiply(ec.g, privKey.s)
+    return try ec.encodePoint(pubKey)
 }
 
 /**
@@ -86,8 +91,8 @@ func sign(privateKey: [UInt8], msg: [UInt8]) throws -> [UInt8] {
     guard msg.count > 0 else { throw CryptoError.emptyMessage }
     guard msg.count <= 32 else { throw CryptoError.messageTooLong }
     
-    let privKey = try secp256k1.Signing.PrivateKey(rawRepresentation: privateKey)
-    return try privKey.signature(for: msg).derRepresentation().bytes
+    let privKey = try ECPrivateKey(der: privateKey)
+    return privKey.sign(msg: msg).asn1.encode()
 }
 
 /**
@@ -97,31 +102,22 @@ func verify(publicKey: [UInt8], msg: [UInt8], sig: [UInt8]) throws -> Bool {
     guard publicKey.count == 65, publicKey[0] == 4 else { throw CryptoError.badPublicKey }
     guard msg.count > 0 else { throw CryptoError.emptyMessage }
     guard msg.count <= 32 else { throw CryptoError.messageTooLong }
-    let signature = try secp256k1.Signing.ECDSASignature(derRepresentation: sig)
-    return try secp256k1.Signing.PublicKey(rawRepresentation: publicKey).isValidSignature(signature, for: msg)
+    let pubKey = try ECPublicKey(der: publicKey)
+    let signature = try ECSignature(asn1: ASN1.build(sig), domain: ec)
+    return pubKey.verify(signature: signature, msg: msg)
 }
 
 /**
  ECDH
  */
 func derive(privateKeyA: [UInt8], publicKeyB: [UInt8]) throws -> [UInt8] {
-    guard privateKeyA.count == 32 else { throw CryptoError.badPrivateKey }
-    guard publicKeyB.count == 65, publicKeyB[0] == 4 else { throw CryptoError.badPublicKey }
+    let domain = Domain.instance(curve: .EC256k1)
     
-    let keyA = try secp256k1.Signing.PrivateKey(rawRepresentation: privateKeyA)
-    let keyB = try secp256k1.Signing.PublicKey(rawRepresentation: publicKeyB)
+    let keyA = try ECPrivateKey(der: privateKeyA)
+    let keyB = try ECPublicKey(der: publicKeyB)
     
-    /**
-     The below commented code is from the javascript identity repo.
-     Question: ec.keyFromPrivate and ec.keyFromPublic are generating keypairs from the elliptic curve, correct? And then keyA.derive() is generating the ECDH shared secret?
-     I can't find a direct equivalent on the secp256k1 library we're using here, am I missing something, or do we need to find another library that can do it?
-     */
-    //      const keyA = ec.keyFromPrivate(privateKeyA);
-    //      const keyB = ec.keyFromPublic(publicKeyB);
-    //      const Px = keyA.derive(keyB.getPublic());  // BN instance
-    //      return new Buffer(Px.toArray());
-    
-    return []
+    let derived = domain.multiply(keyB.w, keyA.s)
+    return try domain.encodePoint(derived)
 }
 
 /**

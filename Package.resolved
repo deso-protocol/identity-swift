@@ -2,6 +2,24 @@
   "object": {
     "pins": [
       {
+        "package": "ASN1",
+        "repositoryURL": "https://github.com/leif-ibsen/ASN1",
+        "state": {
+          "branch": null,
+          "revision": "53e0b34a34f882386e09d10d6d00bb7e969e307f",
+          "version": "1.2.1"
+        }
+      },
+      {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/leif-ibsen/BigInt",
+        "state": {
+          "branch": null,
+          "revision": "56a12cb278293d8e6bec91df6a1e5265e294d6ce",
+          "version": "1.2.5"
+        }
+      },
+      {
         "package": "CryptoSwift",
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
@@ -20,12 +38,12 @@
         }
       },
       {
-        "package": "secp256k1",
-        "repositoryURL": "https://github.com/GigaBitcoin/secp256k1.swift.git",
+        "package": "SwiftECC",
+        "repositoryURL": "https://github.com/leif-ibsen/SwiftECC",
         "state": {
           "branch": null,
-          "revision": "cdf449c7bc176287dc1877902ee98ed6ea46ab7f",
-          "version": "0.3.0"
+          "revision": "621c70126966e5c289c4dc0ff801c6282b6baa05",
+          "version": "1.0.2"
         }
       }
     ]
