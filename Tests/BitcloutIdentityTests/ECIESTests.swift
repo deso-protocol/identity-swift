@@ -61,14 +61,14 @@ final class ECIESTests: XCTestCase {
     func testEncryptDecryptLegacy() {
         let keys = getRandomKeypair()
         let msgText = "Hello, World!"
-        let data = msgText.data(using: .utf8)
-        let msg = data!.bytes
+        let msg = msgText.uInt8Array
+        XCTAssertNotEqual(msg.count, 0)
         
         let encrypted = try! encrypt(publicKeyTo: keys!.public, msg: msg, legacy: true)
+        XCTAssertNotEqual(msg, encrypted)
+        
         let decrypted = try! decrypt(privateKey: keys!.private, encrypted: encrypted, legacy: true)
-        
-        let decryptedText = String(bytes: decrypted, encoding: .utf8)
-        
+        let decryptedText = decrypted.stringValue
         XCTAssertEqual(msgText, decryptedText)
     }
     
@@ -77,14 +77,14 @@ final class ECIESTests: XCTestCase {
         let keysB = getRandomKeypair()!
         
         let msgText = "Hello, World!"
-        let data = msgText.data(using: .utf8)
-        let msg = data!.bytes
+        let msg = msgText.uInt8Array
+        XCTAssertNotEqual(msg.count, 0)
         
         let encrypted = try! encryptShared(privateKeySender: keysA.private, publicKeyRecipient: keysB.public, msg: msg)
+        XCTAssertNotEqual(msg, encrypted)
+        
         let decrypted = try! decryptShared(privateKeyRecipient: keysB.private, publicKeySender: keysA.public, encrypted: encrypted)
-        
-        let decryptedText = String(bytes: decrypted, encoding: .utf8)
-        
+        let decryptedText = decrypted.stringValue
         XCTAssertEqual(msgText, decryptedText)
     }
 }
