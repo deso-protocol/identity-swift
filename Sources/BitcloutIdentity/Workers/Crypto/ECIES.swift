@@ -15,8 +15,8 @@ import ASN1
 
 private let ec = Domain.instance(curve: .EC256k1)
 
-func randomBytes(count: Int) throws -> [UInt8] {
-    var bytes = [UInt8](repeating: 0, count: count)
+func randomBytes(count: Int? = nil) throws -> [UInt8] {
+    var bytes = [UInt8](repeating: 0, count: count ?? Int.random(in: 1..<2048))
     let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
     
     guard status == errSecSuccess else {
@@ -41,16 +41,16 @@ func kdf(secret: [UInt8], outputLength: Int) -> [UInt8] {
     return result
 }
 
-// Question: For the AES encryption/decryption, is pkcs7 the correct padding to use?
+// Question: For the AES encryption/decryption, what padding should be used? Legacy seems to work with pkcs7, but non legacy only works with no padding...
 func aesCtrEncrypt(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UInt8] {
-    var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .pkcs7).makeEncryptor()
+    var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .noPadding).makeEncryptor()
     let firstChunk = try cipher.update(withBytes: data)
     let secondChunk = try cipher.finish()
     return firstChunk + secondChunk
 }
 
 func aesCtrDecrypt(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UInt8] {
-    var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .pkcs7).makeDecryptor()
+    var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .noPadding).makeDecryptor()
     let firstChunk = try cipher.update(withBytes: data)
     let secondChunk = try cipher.finish()
     return firstChunk + secondChunk
@@ -78,7 +78,7 @@ func hmacSha256Sign(key: [UInt8], msg: [UInt8]) throws -> [UInt8] {
  */
 func getPublicKey(from privateKey: [UInt8]) throws -> [UInt8] {
     guard privateKey.count == 32 else { throw CryptoError.badPrivateKey }
-    let privKey = try ECPrivateKey(der: privateKey)
+    let privKey = try ECPrivateKey(domain: ec, s: BInt(magnitude: privateKey))
     let pubKey = ec.multiply(ec.g, privKey.s)
     return try ec.encodePoint(pubKey)
 }
@@ -91,7 +91,7 @@ func sign(privateKey: [UInt8], msg: [UInt8]) throws -> [UInt8] {
     guard msg.count > 0 else { throw CryptoError.emptyMessage }
     guard msg.count <= 32 else { throw CryptoError.messageTooLong }
     
-    let privKey = try ECPrivateKey(der: privateKey)
+    let privKey = try ECPrivateKey(domain: ec, s: BInt(magnitude: privateKey))
     return privKey.sign(msg: msg).asn1.encode()
 }
 
@@ -102,7 +102,7 @@ func verify(publicKey: [UInt8], msg: [UInt8], sig: [UInt8]) throws -> Bool {
     guard publicKey.count == 65, publicKey[0] == 4 else { throw CryptoError.badPublicKey }
     guard msg.count > 0 else { throw CryptoError.emptyMessage }
     guard msg.count <= 32 else { throw CryptoError.messageTooLong }
-    let pubKey = try ECPublicKey(der: publicKey)
+    let pubKey = try ECPublicKey(domain: ec, w: ec.decodePoint(publicKey))
     let signature = try ECSignature(asn1: ASN1.build(sig), domain: ec)
     return pubKey.verify(signature: signature, msg: msg)
 }
@@ -111,13 +111,11 @@ func verify(publicKey: [UInt8], msg: [UInt8], sig: [UInt8]) throws -> Bool {
  ECDH
  */
 func derive(privateKeyA: [UInt8], publicKeyB: [UInt8]) throws -> [UInt8] {
-    let domain = Domain.instance(curve: .EC256k1)
+    let keyA = BInt(magnitude: privateKeyA)
+    let keyB = try ec.decodePoint(publicKeyB)
     
-    let keyA = try ECPrivateKey(der: privateKeyA)
-    let keyB = try ECPublicKey(der: publicKeyB)
-    
-    let derived = domain.multiply(keyB.w, keyA.s)
-    return try domain.encodePoint(derived)
+    let derived = ec.multiply(keyB, keyA)
+    return try ec.encodePoint(derived)
 }
 
 /**

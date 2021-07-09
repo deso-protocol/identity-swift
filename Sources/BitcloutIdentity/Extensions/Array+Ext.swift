@@ -19,6 +19,8 @@ extension Array {
 
 extension Array where Element == UInt8 {
     var stringValue: String? {
-        return String(bytes: self, encoding: .utf8)
+        let data = Data(self)
+        let string = String(data: data, encoding: .utf8)
+        return string
     }
 }

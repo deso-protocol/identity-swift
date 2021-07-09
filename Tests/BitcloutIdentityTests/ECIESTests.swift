@@ -15,18 +15,9 @@ final class ECIESTests: XCTestCase {
     
     private func getRandomKeypair() -> (private: [UInt8], public: [UInt8])? {
         let domain = Domain.instance(curve: .EC256k1)
-        let keys = domain.makeKeyPair()
-        let privateK = keys.1
-        let publicK = keys.0
-        
-        return (private: privateK.asn1.encode(), public: publicK.asn1.encode())
-    }
-    
-    // TODO: get some test data to actually write these tests
-    func testKDF() {
-        let input = "foobarbat"
-        let kdf = kdf(secret: input.uInt8Array, outputLength: 32)
-        XCTAssertEqual("not this", kdf.stringValue)
+        let privateK = BInt(bitWidth: 256)
+        let publicK = domain.multiply(domain.g, privateK)
+        return (private: privateK.asMagnitudeBytes(), public: try! domain.encodePoint(publicK))
     }
     
     func testDerive() {
@@ -46,5 +37,54 @@ final class ECIESTests: XCTestCase {
         let derived1 = try! derive(privateKeyA: keysA!.private, publicKeyB: keysB!.public)
         let derived2 = try! derive(privateKeyA: keysB!.private, publicKeyB: keysC!.public)
         XCTAssertNotEqual(derived1, derived2)
+    }
+    
+    func testVerify() {
+        let keys = getRandomKeypair()
+        let msg: [UInt8] = try! randomBytes(count: 32)
+        
+        let sig = try! sign(privateKey: keys!.private, msg: msg)
+        let verified = try! verify(publicKey: keys!.public, msg: msg, sig: sig)
+        XCTAssertTrue(verified)
+    }
+    
+    func testVerifyNegativeCase() {
+        let keys1 = getRandomKeypair()
+        let keys2 = getRandomKeypair()
+        let msg: [UInt8] = try! randomBytes(count: 32)
+        
+        let sig = try! sign(privateKey: keys1!.private, msg: msg)
+        let verified = try! verify(publicKey: keys2!.public, msg: msg, sig: sig)
+        XCTAssertFalse(verified)
+    }
+    
+    func testEncryptDecryptLegacy() {
+        let keys = getRandomKeypair()
+        let msgText = "Hello, World!"
+        let data = msgText.data(using: .utf8)
+        let msg = data!.bytes
+        
+        let encrypted = try! encrypt(publicKeyTo: keys!.public, msg: msg, legacy: true)
+        let decrypted = try! decrypt(privateKey: keys!.private, encrypted: encrypted, legacy: true)
+        
+        let decryptedText = String(bytes: decrypted, encoding: .utf8)
+        
+        XCTAssertEqual(msgText, decryptedText)
+    }
+    
+    func testEncryptDecryptShared() {
+        let keysA = getRandomKeypair()!
+        let keysB = getRandomKeypair()!
+        
+        let msgText = "Hello, World!"
+        let data = msgText.data(using: .utf8)
+        let msg = data!.bytes
+        
+        let encrypted = try! encryptShared(privateKeySender: keysA.private, publicKeyRecipient: keysB.public, msg: msg)
+        let decrypted = try! decryptShared(privateKeyRecipient: keysB.private, publicKeySender: keysA.public, encrypted: encrypted)
+        
+        let decryptedText = String(bytes: decrypted, encoding: .utf8)
+        
+        XCTAssertEqual(msgText, decryptedText)
     }
 }
