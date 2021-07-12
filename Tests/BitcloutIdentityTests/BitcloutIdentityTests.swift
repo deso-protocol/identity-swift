@@ -48,8 +48,6 @@
             XCTAssertTrue(keyStore.calledGetAllStoredKeys)
         }
         
-        
-        
         func testRemoveAllKeysCallsKeyStore() {
             try! sut.removeAllKeys()
             XCTAssertTrue(keyStore.calledClearAllStoredInfo)
@@ -66,9 +64,11 @@
         func testDecryptCallsMessageDecrypter() {
             let encrypted = [EncryptedMessagesThread(publicKey: "alalalala",
                                                      encryptedMessages: ["foo", "foobar", "batbla"])]
-            let _ = try! sut.decrypt(encrypted)
+            let myPublicKey = "ghghghgh"
+            let _ = try! sut.decrypt(encrypted, for: myPublicKey)
             XCTAssertTrue(messageDecrypter.calledDecryptMessages)
             XCTAssertEqual(messageDecrypter.messagesToDecrypt, encrypted)
+            XCTAssertEqual(messageDecrypter.publicKeyToDecryptFor, myPublicKey)
         }
         
         func testJWTCallsJWTWorker() {

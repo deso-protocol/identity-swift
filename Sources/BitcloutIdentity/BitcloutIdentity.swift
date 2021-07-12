@@ -101,9 +101,9 @@ public class Identity {
      - Parameter threads: An array of `EncryptedMessagesThread` objects to be decrypted
      - Returns: A dictionary with keys of the publicKeys of the threads and values of the messages contained in the thread, in the order they were sent
      */
-    public func decrypt(_ threads: [EncryptedMessagesThread]) throws -> [String: [String]] {
+    public func decrypt(_ threads: [EncryptedMessagesThread], for myPublicKey: String) throws -> [String: [String]] {
         // TODO: Check if logged in and throw error if not
-        return try messageDecrypter.decryptMessages(threads)
+        return try messageDecrypter.decryptMessages(threads, for: myPublicKey)
     }
 
     /**

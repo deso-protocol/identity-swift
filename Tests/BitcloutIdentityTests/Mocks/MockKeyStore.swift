@@ -15,6 +15,11 @@ class MockKeyStore: KeyInfoStorable {
                                                   signedHash: "bla",
                                                   jwt: "joooot")
     
+    var mockSharedSecret: SharedSecret? = SharedSecret(secret: "foo",
+                                                       privateKey: "bar",
+                                                       publicKey: "bat",
+                                                       myTruePublicKey: "foobarbat")
+    
     var calledStoreInfo: Bool = false
     var infoRequestedToStore: DerivedKeyInfo?
     func store(_ info: DerivedKeyInfo) throws {
@@ -41,6 +46,22 @@ class MockKeyStore: KeyInfoStorable {
     func getAllStoredKeys() throws -> [String] {
         calledGetAllStoredKeys = true
         return ["foo"]
+    }
+    
+    var calledGetSharedSecret: Bool = false
+    var myPublicKeyToGetSharedSecret: String?
+    var otherPublicKeyToGetSharedSecret: String?
+    func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret? {
+        calledGetSharedSecret = true
+        myPublicKeyToGetSharedSecret = myPublicKey
+        otherPublicKeyToGetSharedSecret = otherPublicKey
+        return mockSharedSecret
+    }
+    
+    var calledGetAllSharedSecrets: Bool = false
+    func getAllSharedSecrets() throws -> [SharedSecret] {
+        calledGetAllSharedSecrets = true
+        return [mockSharedSecret!]
     }
     
     var calledStoreSharedSecret: Bool = false

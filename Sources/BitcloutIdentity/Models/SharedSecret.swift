@@ -11,4 +11,5 @@ struct SharedSecret: Codable {
     let secret: String
     let privateKey: String
     let publicKey: String
+    let myTruePublicKey: String
 }

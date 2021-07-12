@@ -12,9 +12,11 @@ class MockMessageDecrypter: MessageDecryptable {
     var mockDecryptedMessages = ["foo": ["bar"], "bar": ["bat"], "bat": ["foo"]]
     var calledDecryptMessages: Bool = false
     var messagesToDecrypt: [EncryptedMessagesThread]?
-    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]] {
+    var publicKeyToDecryptFor: String?
+    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread], for myPublicKey: String) throws -> [String: [String]] {
         calledDecryptMessages = true
         messagesToDecrypt = encryptedMessageThreads
+        publicKeyToDecryptFor = myPublicKey
         return mockDecryptedMessages
     }
 }

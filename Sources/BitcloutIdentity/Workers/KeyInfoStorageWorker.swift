@@ -17,7 +17,7 @@ protocol KeyInfoStorable {
     func clearSharedSecret(for privateKey: String, and publicKey: String) throws
     func getDerivedKeyInfo(for publicKey: String) throws -> DerivedKeyInfo?
     func getAllStoredKeys() throws -> [String]
-    func getSharedSecret(for myPrivateKey: String, and otherPublicKey: String) throws -> SharedSecret
+    func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret?
     func getAllSharedSecrets() throws -> [SharedSecret]
 }
 
@@ -98,11 +98,11 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         return storedData.keys.map { $0 }
     }
     
-    func getSharedSecret(for myPrivateKey: String, and otherPublicKey: String) throws -> SharedSecret? {
+    func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret? {
         let sharedSecrets = try getAllSharedSecrets()
         return sharedSecrets
             .first {
-                $0.privateKey == myPrivateKey && $0.publicKey == otherPublicKey
+                $0.myTruePublicKey == myPublicKey && $0.publicKey == otherPublicKey
             }
     }
     
