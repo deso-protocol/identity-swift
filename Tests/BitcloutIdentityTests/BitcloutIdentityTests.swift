@@ -61,14 +61,26 @@
             XCTAssertEqual(transactionSigner.transactionRequestedForSign, transaction)
         }
         
-        func testDecryptCallsMessageDecrypter() {
+        func testDecryptThreadsCallsMessageDecrypter() {
             let encrypted = [EncryptedMessagesThread(publicKey: "alalalala",
                                                      encryptedMessages: ["foo", "foobar", "batbla"])]
             let myPublicKey = "ghghghgh"
-            let _ = try! sut.decrypt(encrypted, for: myPublicKey)
-            XCTAssertTrue(messageDecrypter.calledDecryptMessages)
+            let _ = try! sut.decrypt(encrypted, for: myPublicKey, errorOnFailure: true)
+            XCTAssertTrue(messageDecrypter.calledDecryptThreads)
             XCTAssertEqual(messageDecrypter.messagesToDecrypt, encrypted)
             XCTAssertEqual(messageDecrypter.publicKeyToDecryptFor, myPublicKey)
+            XCTAssertEqual(messageDecrypter.errorOnFailure, true)
+        }
+        
+        func testDecryptSingleThreadCallsMessageDecrypter() {
+            let encrypted = EncryptedMessagesThread(publicKey: "alalalala",
+                                                     encryptedMessages: ["foo", "foobar", "batbla"])
+            let myPublicKey = "ghghghgh"
+            let _ = try! sut.decrypt(encrypted, for: myPublicKey, errorOnFailure: true)
+            XCTAssertTrue(messageDecrypter.calledDecryptThread)
+            XCTAssertEqual(messageDecrypter.threadToDecrypt, encrypted)
+            XCTAssertEqual(messageDecrypter.publicKeyToDecryptFor, myPublicKey)
+            XCTAssertEqual(messageDecrypter.errorOnFailure, true)
         }
         
         func testJWTCallsJWTWorker() {

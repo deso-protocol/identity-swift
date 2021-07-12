@@ -12,6 +12,7 @@ public enum IdentityError: Swift.Error {
     case notLoggedIn
     case missingInfoForPublicKey
     case keyInfoExpired
+    case missingSharedSecret
 }
 
 enum CryptoError: Swift.Error {
