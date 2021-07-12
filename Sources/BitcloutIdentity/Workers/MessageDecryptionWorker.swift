@@ -36,8 +36,14 @@ class MessageDecryptionWorker: MessageDecryptable {
         guard let sharedSecret = try? keyStore.getSharedSecret(for: publicKey, and: thread.publicKey) else {
             throw IdentityError.missingSharedSecret
         }
+        var decrypted: [String] = []
         do {
-        let decrypted = try decrypt(messages: thread.encryptedMessages, with: sharedSecret)
+            decrypted = try decrypt(messages: thread.encryptedMessages, with: sharedSecret)
+        } catch {
+            if errorOnFailure {
+                throw error
+            }
+        }
         return decrypted
     }
     
