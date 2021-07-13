@@ -6,7 +6,6 @@
 //
 
 import XCTest
-import Security
 import SwiftECC
 import BigInt
 @testable import BitcloutIdentity
