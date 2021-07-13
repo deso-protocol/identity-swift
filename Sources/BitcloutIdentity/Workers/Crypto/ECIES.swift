@@ -181,6 +181,13 @@ func encryptShared(privateKeySender: [UInt8],
                    ephemPrivateKey: [UInt8]? = nil,
                    iv: [UInt8]? = nil) throws -> [UInt8] {
     let sharedPx = try derive(privateKeyA: privateKeySender, publicKeyB: publicKeyRecipient)
+    return try encryptShared(sharedPx: sharedPx, msg: msg, ephemPrivateKey: ephemPrivateKey, iv: iv)
+}
+
+func encryptShared(sharedPx: [UInt8],
+                   msg: [UInt8],
+                   ephemPrivateKey: [UInt8]? = nil,
+                   iv: [UInt8]? = nil) throws -> [UInt8] {
     let sharedPrivateKey = kdf(secret: sharedPx, outputLength: 32)
     let sharedPublicKey = try getPublicKey(from: sharedPrivateKey)
     
@@ -196,6 +203,10 @@ func encryptShared(privateKeySender: [UInt8],
  */
 func decryptShared(privateKeyRecipient: [UInt8], publicKeySender: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
     let sharedPx = try derive(privateKeyA: privateKeyRecipient, publicKeyB: publicKeySender)
+    return try decryptShared(sharedPx: sharedPx, encrypted: encrypted)
+}
+
+func decryptShared(sharedPx: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
     let sharedPrivateKey = kdf(secret: sharedPx, outputLength: 32)
     return try decrypt(privateKey: sharedPrivateKey, encrypted: encrypted)
 }

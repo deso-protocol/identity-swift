@@ -49,9 +49,8 @@ class MessageDecryptionWorker: MessageDecryptable {
     
     private func decrypt(messages: [String], with secret: SharedSecret) throws -> [String] {
         return try messages.compactMap {
-            return try decryptShared(privateKeyRecipient: secret.privateKey.uInt8Array,
-                                      publicKeySender: secret.publicKey.uInt8Array,
-                                      encrypted: $0.uInt8Array).stringValue
+            return try decryptShared(sharedPx: secret.secret.uInt8Array,
+                                     encrypted: $0.uInt8Array).stringValue
         }
     }
 }
