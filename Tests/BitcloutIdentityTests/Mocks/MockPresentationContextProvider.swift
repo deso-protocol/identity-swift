@@ -10,7 +10,11 @@ import AuthenticationServices
 @testable import BitcloutIdentity
 
 class MockPresentationContextProvider: NSObject, PresentationContextProvidable {
+    #if os(iOS)
     var mockPresentationAnchor = UIWindow()
+    #elseif os(macOS)
+    var mockPresentationAnchor = NSWindow()
+    #endif
     var calledPresentationAnchor: Bool = false
     var sessionForAnchor: ASWebAuthenticationSession?
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
