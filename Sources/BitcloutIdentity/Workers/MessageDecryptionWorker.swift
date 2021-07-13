@@ -8,15 +8,49 @@
 import Foundation
 
 protocol MessageDecryptable {
-    // TODO: confirm interface. May need a public key/other crypto info passed as well
-    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]]
+    func decryptThreads(_ encryptedMessageThreads: [EncryptedMessagesThread], for publicKey: String, errorOnFailure: Bool) throws -> [String: [String]]
+    func decryptThread(_ thread: EncryptedMessagesThread, for publicKey: String, errorOnFailure: Bool) throws -> [String]
 }
 
 class MessageDecryptionWorker: MessageDecryptable {
-    func decryptMessages(_ encryptedMessageThreads: [EncryptedMessagesThread]) throws -> [String: [String]] {
-        // TODO: Actually decrypt the messages
-        return encryptedMessageThreads.reduce(into: [:], { res, this in
-            res[this.publicKey] = this.encryptedMessages
+    
+    private let keyStore: KeyInfoStorable
+    
+    init(keyStore: KeyInfoStorable = KeyInfoStorageWorker()) {
+        self.keyStore = keyStore
+    }
+    
+    func decryptThreads(_ encryptedMessageThreads: [EncryptedMessagesThread], for publicKey: String, errorOnFailure: Bool) throws -> [String: [String]] {
+        return try encryptedMessageThreads.reduce(into: [:], { res, this in
+            do {
+                res[this.publicKey] = try decryptThread(this, for: publicKey, errorOnFailure: errorOnFailure)
+            } catch {
+                if errorOnFailure {
+                    throw error
+                }
+            }
         })
+    }
+    
+    func decryptThread(_ thread: EncryptedMessagesThread, for publicKey: String, errorOnFailure: Bool) throws -> [String] {
+        guard let sharedSecret = try? keyStore.getSharedSecret(for: publicKey, and: thread.publicKey) else {
+            throw IdentityError.missingSharedSecret
+        }
+        var decrypted: [String] = []
+        do {
+            decrypted = try decrypt(messages: thread.encryptedMessages, with: sharedSecret)
+        } catch {
+            if errorOnFailure {
+                throw error
+            }
+        }
+        return decrypted
+    }
+    
+    private func decrypt(messages: [String], with secret: SharedSecret) throws -> [String] {
+        return try messages.compactMap {
+            return try decryptShared(sharedPx: secret.secret.uInt8Array,
+                                     encrypted: $0.uInt8Array).stringValue
+        }
     }
 }

@@ -87,4 +87,22 @@ final class ECIESTests: XCTestCase {
         let decryptedText = decrypted.stringValue
         XCTAssertEqual(msgText, decryptedText)
     }
+    
+    func testEncryptDecryptWithSharedSecret() {
+        let keysA = getRandomKeypair()!
+        let keysB = getRandomKeypair()!
+        let msgText = "Hello, World!"
+        let msg = msgText.uInt8Array
+        XCTAssertNotEqual(msg.count, 0)
+        
+        let sharedPx = try! derive(privateKeyA: keysA.private, publicKeyB: keysB.public)
+        XCTAssertNotEqual(sharedPx.count, 0)
+        
+        let encrypted = try! encryptShared(sharedPx: sharedPx, msg: msg)
+        XCTAssertNotEqual(msg, encrypted)
+        
+        let decrypted = try! decryptShared(sharedPx: sharedPx, encrypted: encrypted)
+        let decryptedText = decrypted.stringValue
+        XCTAssertEqual(msgText, decryptedText)
+    }
 }

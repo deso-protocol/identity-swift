@@ -97,13 +97,27 @@ public class Identity {
     }
 
     /**
-     Decrypt private messages
-     - Parameter threads: An array of `EncryptedMessagesThread` objects to be decrypted
+     Decrypt private messages from a collection of threads
+     - Parameters:
+        - threads: An array of `EncryptedMessagesThread` objects to be decrypted
+        - myPublicKey: The public key of the calling user's account
+        - errorOnFailure: true if failure to decrypt messages should return an error, false if messages which cannot be decrypted should just be ommitted from the results
      - Returns: A dictionary with keys of the publicKeys of the threads and values of the messages contained in the thread, in the order they were sent
      */
-    public func decrypt(_ threads: [EncryptedMessagesThread]) throws -> [String: [String]] {
-        // TODO: Check if logged in and throw error if not
-        return try messageDecrypter.decryptMessages(threads)
+    public func decrypt(_ threads: [EncryptedMessagesThread], for myPublicKey: String, errorOnFailure: Bool = false) throws -> [String: [String]] {
+        return try messageDecrypter.decryptThreads(threads, for: myPublicKey, errorOnFailure: errorOnFailure)
+    }
+    
+    /**
+     Decrypt private messages from a single thread
+     - Parameters:
+        - thread: An `EncryptedMessagesThread` object to be decrypted
+        - myPublicKey: The public key of the calling user's account
+        - errorOnFailure: true if failure to decrypt messages should return an error, false if messages which cannot be decrypted should just be ommitted from the results
+     - Returns: An array of decrypted message strings in the order they were sent
+     */
+    public func decrypt(_ thread: EncryptedMessagesThread, for myPublicKey: String, errorOnFailure: Bool = false) throws -> [String] {
+        return try messageDecrypter.decryptThread(thread, for: myPublicKey, errorOnFailure: errorOnFailure)
     }
 
     /**
