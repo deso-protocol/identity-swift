@@ -19,9 +19,17 @@ public class Identity {
     private let context: PresentationContextProvidable
     
     public convenience init() throws {
+        #if os(iOS)
         guard let window = UIApplication.shared.windows.first else {
             throw IdentityError.missingPresentationAnchor
         }
+        let context = PresentationContextProvider(anchor: window)
+        #elseif os(macOS)
+        guard let window = NSApplication.shared.windows.first else {
+            throw IdentityError.missingPresentationAnchor
+        }
+        let context = PresentationContextProvider(anchor: window)
+        #endif
         
         self.init(
             authWorker: AuthWorker(),
@@ -29,7 +37,7 @@ public class Identity {
             transactionSigner: SignTransactionWorker(),
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),
-            context: PresentationContextProvider(anchor: window)
+            context: context
         )
     }
     
