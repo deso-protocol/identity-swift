@@ -13,8 +13,20 @@ protocol JWTFetchable {
 }
 
 class JWTWorker: JWTFetchable {
+    
+    private let keyStore: KeyInfoStorable
+    
+    init(keyStore: KeyInfoStorable = KeyInfoStorageWorker()) {
+        self.keyStore = keyStore
+    }
+    
     func getJWT(for publicKey: String) throws -> String {
-        // TODO: Actually fetch the JWT and return it, or throw an error if there is no jwt for this public key
-        return ""
+        guard let keyInfo = try keyStore.getDerivedKeyInfo(for: publicKey) else {
+            throw IdentityError.missingInfoForPublicKey
+        }
+        
+        // TODO: Check if derived key is expired and get a new one if necessary?
+        
+        return keyInfo.jwt
     }
 }

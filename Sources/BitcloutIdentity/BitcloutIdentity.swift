@@ -135,7 +135,6 @@ public class Identity {
      - Throws: Error if the publicKey is not logged in
      */
     public func jwt(for publicKey: String) throws -> String {
-        // TODO: Check if logged in and throw error if not
         return try jwtWorker.getJWT(for: publicKey)
     }
 }
