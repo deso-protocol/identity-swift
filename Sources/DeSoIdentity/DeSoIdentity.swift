@@ -19,6 +19,14 @@ public class Identity {
      */
     public typealias LoginCompletion = ((_ response: LoginResponse) -> Void)
     
+    /**
+     Completion handler called upon successful submission of a signed transaction
+     - Parameter statusCode: The HTTP status code of the request, if it was actually sent, nil otherwise
+     - Parameter responseBody: A Decodable object containing the response body, if present, nil otherwise
+     - Parameter error: On success nil, on failure, the error returned
+     */
+    public typealias TransactionCompletion<T: Decodable> = ((_ statusCode: Int?, _ responseBody: T?, _ error: Error?) -> Void)
+    
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
     private let transactionSigner: TransactionSignable
@@ -122,11 +130,36 @@ public class Identity {
 
     /**
      Sign a transaction to be committed to the blockchain. Note, this does not write the transaction, it just signs it.
-     - Parameter transaction: and `UnsignedTransaction` object to be signed
+     - Parameter transaction: an `UnsignedTransaction` object to be signed
      - Returns: A signed hash of the transaction
      */
     public func sign(_ transaction: UnsignedTransaction) throws -> String {
         return try transactionSigner.signTransaction(transaction)
+    }
+    
+    /**
+     Sign a transaction and immediately submit it.
+     NOTE: This requires the target node to conform to the same API spec as the core bitclout node.
+     Specifically, it requires the `/submit-transaction` endpoint as detailed here: https://docs.bitclout.com/devs/backend-api#submit-transaction
+     - Parameter T: a `Decodable` type to expect back in the `/submit-transaction` response
+     - Parameter transaction: an `UnsignedTransaction` object to be signed
+     - Parameter completion: a `TransactionCompletion` block that will be called upon completion of the sign/submission process
+     */
+    public func signAndSubmit<T: Decodable>(_ transaction: UnsignedTransaction, completion: TransactionCompletion<T>?) throws {
+        // TODO: sign transaction, handle possible unauthorized key error, then submit the signed transaction and return the expected response body
+        // QUESTION: Is it appropriate to require the client to define the response type, or should we define it in the library for convenience?
+        
+        /**
+         Probable flow here:
+         - Check if derived key is stored for public key in transaction
+         - If not, throw error, client should ask for login
+         - If so, sign transaction with it, then call `/submit-transaction`
+         - If success, great, return to client
+         - If failure, check reason
+             - If derived key expired, present webview and retyr upon retrieving new derived key
+             - If derived key not authorised, silently create and submit new authorise transaction, then retry
+             - Any other error, return to client
+         */
     }
 
     /**
