@@ -24,7 +24,8 @@
                 transactionSigner: transactionSigner,
                 messageDecrypter: messageDecrypter,
                 jwtWorker: jwtCreator,
-                context: context
+                context: context,
+                nodeBaseURL: "foo://bar"
             )
         }
         

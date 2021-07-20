@@ -17,8 +17,9 @@ public class Identity {
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
     private let context: PresentationContextProvidable
+    private let nodeBaseURL: String
     
-    public convenience init() throws {
+    public convenience init(nodeBaseURL: String) throws {
         #if os(iOS)
         guard let window = UIApplication.shared.windows.first else {
             throw IdentityError.missingPresentationAnchor
@@ -37,7 +38,8 @@ public class Identity {
             transactionSigner: SignTransactionWorker(),
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),
-            context: context
+            context: context,
+            nodeBaseURL: nodeBaseURL
         )
     }
     
@@ -47,7 +49,8 @@ public class Identity {
         transactionSigner: TransactionSignable,
         messageDecrypter: MessageDecryptable,
         jwtWorker: JWTFetchable,
-        context: PresentationContextProvidable
+        context: PresentationContextProvidable,
+        nodeBaseURL: String
     ) {
         self.authWorker = authWorker
         self.keyStore = keyStore
@@ -55,6 +58,7 @@ public class Identity {
         self.messageDecrypter = messageDecrypter
         self.jwtWorker = jwtWorker
         self.context = context
+        self.nodeBaseURL = nodeBaseURL
     }
 
     // TODO: When Swift 5.5. is widely available, update this to use async/await
