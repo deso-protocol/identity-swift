@@ -25,6 +25,7 @@
                 messageDecrypter: messageDecrypter,
                 jwtWorker: jwtCreator,
                 context: context,
+                nodeBaseURL: "foo://bar",
                 network: .testnet,
                 overrideIdentityURL: nil
             )

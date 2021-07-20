@@ -25,10 +25,11 @@ public class Identity {
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
     private let context: PresentationContextProvidable
+    private let nodeBaseURL: String
     private let network: Network
     private let overrideIdentityURL: String?
     
-    public convenience init(network: Network = .mainnet, overrideIdentityURL: String? = nil) throws {
+    public convenience init(nodeBaseURL: String, network: Network = .mainnet, overrideIdentityURL: String? = nil) throws {
         #if os(iOS)
         guard let window = UIApplication.shared.windows.first else {
             throw IdentityError.missingPresentationAnchor
@@ -54,6 +55,7 @@ public class Identity {
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),
             context: context,
+            nodeBaseURL: nodeBaseURL,
             network: network,
             overrideIdentityURL: overrideIdentityURL
         )
@@ -66,6 +68,7 @@ public class Identity {
         messageDecrypter: MessageDecryptable,
         jwtWorker: JWTFetchable,
         context: PresentationContextProvidable,
+        nodeBaseURL: String,
         network: Network,
         overrideIdentityURL: String?
     ) {
@@ -75,6 +78,7 @@ public class Identity {
         self.messageDecrypter = messageDecrypter
         self.jwtWorker = jwtWorker
         self.context = context
+        self.nodeBaseURL = nodeBaseURL
         self.network = network
         self.overrideIdentityURL = overrideIdentityURL
     }
