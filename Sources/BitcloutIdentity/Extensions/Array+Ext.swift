@@ -8,9 +8,9 @@
 import Foundation
 
 extension Array {
-    func slice(from start: Int, length: Int? = nil) -> Array<Element> {
-        if let length = length {
-            return Array(self[start..<length])
+    func slice(from start: Int, to end: Int? = nil) -> Array<Element> {
+        if let end = end {
+            return Array(self[start..<end])
         } else {
             return Array(self.suffix(from: start))
         }

@@ -129,7 +129,7 @@ func encrypt(publicKeyTo: [UInt8], msg: [UInt8], ephemPrivateKey: [UInt8]? = nil
     let sharedPx = try derive(privateKeyA: ephemPrivateKey, publicKeyB: publicKeyTo)
     let hash =  kdf(secret: sharedPx, outputLength: 32)
     let iv = try iv ?? randomBytes(count: 16)
-    let encryptionKey = hash.slice(from: 0, length: 16)
+    let encryptionKey = hash.slice(from: 0, to: 16)
     
     let macKey = Hash.sha256(hash.slice(from: 16))
     
@@ -151,17 +151,17 @@ func decrypt(privateKey: [UInt8], encrypted: [UInt8], legacy: Bool = false) thro
     guard encrypted.count > metaLength, encrypted[0] >= 2, encrypted[0] <= 4 else { throw CryptoError.invalidCipherText }
     
     // deserialize
-    let ephemPublicKey = encrypted.slice(from: 0, length: 65)
+    let ephemPublicKey = encrypted.slice(from: 0, to: 65)
     let cipherTextLength = encrypted.count - metaLength
-    let iv = encrypted.slice(from: 65, length: 65 + 16)
-    let cipherAndIv = encrypted.slice(from: 65, length: 65 + 16 + cipherTextLength)
+    let iv = encrypted.slice(from: 65, to: 65 + 16)
+    let cipherAndIv = encrypted.slice(from: 65, to: 65 + 16 + cipherTextLength)
     let cipherText = cipherAndIv.slice(from: 16)
     let msgMac = encrypted.slice(from: 65 + 16 + cipherTextLength)
     
     // check HMAC
     let px = try derive(privateKeyA: privateKey, publicKeyB: ephemPublicKey)
     let hash = kdf(secret: px, outputLength: 32)
-    let encryptionKey = hash.slice(from: 0, length: 16)
+    let encryptionKey = hash.slice(from: 0, to: 16)
     let macKey = Hash.sha256(hash.slice(from: 16))
     guard try hmacSha256Sign(key: macKey, msg: cipherAndIv) == msgMac else { throw CryptoError.incorrectMAC }
     
