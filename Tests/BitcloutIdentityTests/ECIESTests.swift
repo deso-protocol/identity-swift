@@ -8,15 +8,21 @@
 import XCTest
 import SwiftECC
 import BigInt
+import CryptoSwift
+import ASN1
 @testable import BitcloutIdentity
 
 final class ECIESTests: XCTestCase {
     
     private func getRandomKeypair() -> (private: [UInt8], public: [UInt8])? {
-        let domain = Domain.instance(curve: .EC256k1)
         let privateK = BInt(bitWidth: 256)
-        let publicK = domain.multiply(domain.g, privateK)
-        return (private: privateK.asMagnitudeBytes(), public: try! domain.encodePoint(publicK))
+        return (private: privateK.asMagnitudeBytes(), public: getPublicKeyBuffer(from: privateK))
+    }
+    
+    private func getPublicKeyBuffer(from privateKey: BInt) -> [UInt8] {
+        let domain = Domain.instance(curve: .EC256k1)
+        let publicK = domain.multiply(domain.g, privateKey)
+        return try! domain.encodePoint(publicK)
     }
     
     func testDerive() {
@@ -103,5 +109,16 @@ final class ECIESTests: XCTestCase {
         let decrypted = try! decryptShared(sharedPx: sharedPx, encrypted: encrypted)
         let decryptedText = decrypted.stringValue
         XCTAssertEqual(msgText, decryptedText)
+    }
+    
+    func testSignTransaction() {
+        let keypair = getRandomKeypair()!
+        let input = try! randomBytes(count: .random(in: 200..<1500))
+        
+        let seedHex = keypair.private.toHexString()
+        let inputHex = input.toHexString()
+        
+        let signed = try? signTransaction(seedHex: seedHex, transactionHex: inputHex)
+        XCTAssertNotNil(signed)
     }
 }

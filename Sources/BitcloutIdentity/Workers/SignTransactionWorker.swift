@@ -26,11 +26,6 @@ class SignTransactionWorker: TransactionSignable {
         
         // TODO: Can we check here if the derived key is still valid, or should we sign it, try to commit, and see if it fails?
         
-        let signed = try sign(privateKey: key.newPrivateKey.uInt8Array, msg: transaction.transactionHex.uInt8Array)
-        guard let signedString = signed.stringValue else {
-            throw IdentityError.signatureNotAString
-        }
-        
-        return signedString
+        return try BitcloutIdentity.signTransaction(seedHex: key.newPrivateKey, transactionHex: transaction.transactionHex)
     }
 }
