@@ -100,7 +100,6 @@ public class Identity {
      - Returns: A signed hash of the transaction
      */
     public func sign(_ transaction: UnsignedTransaction) throws -> String {
-        // TODO: Check if logged in and throw error if not
         return try transactionSigner.signTransaction(transaction)
     }
 

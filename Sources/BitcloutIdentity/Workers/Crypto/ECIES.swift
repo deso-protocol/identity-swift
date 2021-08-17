@@ -211,3 +211,20 @@ func decryptShared(sharedPx: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
     return try decrypt(privateKey: sharedPrivateKey, encrypted: encrypted)
 }
 
+/**
+ Sign a Transaction Hex for submission
+ */
+func signTransaction(seedHex: String, transactionHex: String) throws -> String {
+    let privateKey = try ECPrivateKey(domain: Domain.instance(curve: .EC256k1), s: BInt(seedHex, radix: 16)!)
+    
+    let transactionBytes = [UInt8](hex: transactionHex)
+    let transactionHash = Hash.sha256(transactionBytes)
+    let signature = privateKey.sign(msg: transactionHash, deterministic: true)
+    let signatureBytes = signature.asn1.encode()
+    
+    let signatureLength = UInt64(signatureBytes.count).toBytes.filter { $0 != 0 }
+    
+    let slicedTransactionBytes = transactionBytes.dropLast()
+    let signedTransactionBytes: [UInt8] = slicedTransactionBytes + signatureLength + signatureBytes
+    return signedTransactionBytes.toHexString()
+}

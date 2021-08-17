@@ -13,6 +13,7 @@ public enum IdentityError: Swift.Error {
     case missingInfoForPublicKey
     case keyInfoExpired
     case missingSharedSecret
+    case signatureNotAString
 }
 
 enum CryptoError: Swift.Error {
