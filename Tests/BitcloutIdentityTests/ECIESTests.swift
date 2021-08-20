@@ -124,6 +124,7 @@ final class ECIESTests: XCTestCase {
         XCTAssertNotNil(signed)
     }
     
+    #if compiler(>=5.3)
     @available(macOS 11.3, *)
     func testSignKnown() {
         // seed hex of the signing user
@@ -180,4 +181,5 @@ final class ECIESTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
     }
+    #endif
 }
