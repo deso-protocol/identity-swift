@@ -28,9 +28,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "BitcloutIdentity",
-            dependencies: ["KeychainAccess", "CryptoSwift", "SwiftECC"]),
+            dependencies: ["KeychainAccess", "CryptoSwift", "SwiftECC", "Base58"]),
         .testTarget(
             name: "BitcloutIdentityTests",
-            dependencies: ["BitcloutIdentity", "Base58"]),
+            dependencies: ["BitcloutIdentity"]),
     ]
 )
