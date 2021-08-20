@@ -124,6 +124,7 @@ final class ECIESTests: XCTestCase {
         XCTAssertNotNil(signed)
     }
     
+    @available(macOS 11.3, *)
     func testSignKnown() {
         // seed hex of the signing user
         let seedHex = ""
@@ -141,6 +142,7 @@ final class ECIESTests: XCTestCase {
         }
     }
     
+    @available(macOS 11.3, *)
     func testDecryptLegacyKnown() {
         // seed hex for the receiving user
         let seedHex = ""
@@ -158,6 +160,7 @@ final class ECIESTests: XCTestCase {
         }
     }
     
+    @available(macOS 11.3, *)
     func testDecryptSharedKnown() {
         // encrypted V2 hex string from get-messages-stateless
         let encrypted =  ""
