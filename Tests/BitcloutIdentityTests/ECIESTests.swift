@@ -10,6 +10,8 @@ import SwiftECC
 import BigInt
 import CryptoSwift
 import ASN1
+import Base58
+
 @testable import BitcloutIdentity
 
 final class ECIESTests: XCTestCase {
@@ -29,8 +31,8 @@ final class ECIESTests: XCTestCase {
         let keysA = getRandomKeypair()
         let keysB = getRandomKeypair()
         
-        let derived1 = try! derive(privateKeyA: keysA!.private, publicKeyB: keysB!.public)
-        let derived2 = try! derive(privateKeyA: keysB!.private, publicKeyB: keysA!.public)
+        let derived1 = try! deriveX(privateKeyA: keysA!.private, publicKeyB: keysB!.public)
+        let derived2 = try! deriveX(privateKeyA: keysB!.private, publicKeyB: keysA!.public)
         XCTAssertEqual(derived1, derived2)
     }
     
@@ -39,8 +41,8 @@ final class ECIESTests: XCTestCase {
         let keysB = getRandomKeypair()
         let keysC = getRandomKeypair()
         
-        let derived1 = try! derive(privateKeyA: keysA!.private, publicKeyB: keysB!.public)
-        let derived2 = try! derive(privateKeyA: keysB!.private, publicKeyB: keysC!.public)
+        let derived1 = try! deriveX(privateKeyA: keysA!.private, publicKeyB: keysB!.public)
+        let derived2 = try! deriveX(privateKeyA: keysB!.private, publicKeyB: keysC!.public)
         XCTAssertNotEqual(derived1, derived2)
     }
     
@@ -100,7 +102,7 @@ final class ECIESTests: XCTestCase {
         let msg = msgText.uInt8Array
         XCTAssertNotEqual(msg.count, 0)
         
-        let sharedPx = try! derive(privateKeyA: keysA.private, publicKeyB: keysB.public)
+        let sharedPx = try! deriveX(privateKeyA: keysA.private, publicKeyB: keysB.public)
         XCTAssertNotEqual(sharedPx.count, 0)
         
         let encrypted = try! encryptShared(sharedPx: sharedPx, msg: msg)
@@ -120,5 +122,59 @@ final class ECIESTests: XCTestCase {
         
         let signed = try? signTransaction(seedHex: seedHex, transactionHex: inputHex)
         XCTAssertNotNil(signed)
+    }
+    
+    func testSignKnown() {
+        // seed hex of the signing user
+        let seedHex = ""
+        // unsigned transaction hex, output of any transaction constructing API call
+        let inputHex = ""
+        // signed transaction hex, input to the corresponding sumbit-transaction call
+        let expected = ""
+        XCTExpectFailure("This will fail until values are supplied above. Comment out this line to properly run the test")
+        do {
+            let signedHash = try signTransaction(seedHex: seedHex, transactionHex: inputHex)
+            XCTAssertEqual(signedHash, expected)
+        } catch {
+            print(error.localizedDescription)
+            XCTFail()
+        }
+    }
+    
+    func testDecryptLegacyKnown() {
+        // seed hex for the receiving user
+        let seedHex = ""
+        // encrypted V1 hex string from get-messages-stateless
+        let encrypted = ""
+        // the actual message text
+        let expected = ""
+        XCTExpectFailure("This will fail until values are supplied above. Comment out this line to properly run the test")
+        
+        do {
+            let decrypted = try decrypt(privateKey: [UInt8](hex: seedHex), encrypted: [UInt8](hex: encrypted), legacy: true)
+            XCTAssertNotEqual(decrypted.stringValue, expected)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+    
+    func testDecryptSharedKnown() {
+        // encrypted V2 hex string from get-messages-stateless
+        let encrypted =  ""
+        // seed hex for receiving user
+        let seedHex = ""
+        // public key (in Base58 prefixed format) for sending user
+        let pKeyOther = ""
+        // the actual message text
+        let expected = ""
+        
+        XCTExpectFailure("This will fail until values are supplied above. Comment out this line to properly run the test")
+        do {
+            let decodedOtherPK = try Base58CheckDecodePrefix(input: pKeyOther, prefixLen: 3).result
+            let decrypted = try decryptShared(privateKeyRecipient: [UInt8](hex: seedHex), publicKeySender: [UInt8](decodedOtherPK), encrypted: [UInt8](hex: encrypted))
+            XCTAssertEqual(decrypted.stringValue, expected)
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
     }
 }

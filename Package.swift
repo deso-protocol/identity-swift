@@ -20,7 +20,8 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(name: "KeychainAccess", url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "4.2.2"),
         .package(name: "CryptoSwift", url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMinor(from: "1.4.0")),
-        .package(name: "SwiftECC", url: "https://github.com/leif-ibsen/SwiftECC", from: "1.0.2")
+        .package(name: "SwiftECC", url: "https://github.com/leif-ibsen/SwiftECC", from: "1.0.2"),
+        .package(name: "Base58", url: "https://github.com/Alja7dali/swift-base58.git", from: "1.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -30,6 +31,6 @@ let package = Package(
             dependencies: ["KeychainAccess", "CryptoSwift", "SwiftECC"]),
         .testTarget(
             name: "BitcloutIdentityTests",
-            dependencies: ["BitcloutIdentity"]),
+            dependencies: ["BitcloutIdentity", "Base58"]),
     ]
 )

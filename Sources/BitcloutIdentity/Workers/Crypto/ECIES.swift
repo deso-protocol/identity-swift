@@ -25,7 +25,6 @@ func randomBytes(count: Int? = nil) throws -> [UInt8] {
     return bytes
 }
 
-// TODO: Verify that this exactly matched the implementation in https://github.com/bitclout/identity/blob/main/src/lib/ecies/index.js
 func kdf(secret: [UInt8], outputLength: Int) -> [UInt8] {
     var ctr: UInt8 = 1
     var written = 0
@@ -41,7 +40,6 @@ func kdf(secret: [UInt8], outputLength: Int) -> [UInt8] {
     return result
 }
 
-// Question: For the AES encryption/decryption, what padding should be used? Legacy seems to work with pkcs7, but non legacy only works with no padding...
 func aesCtrEncrypt(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UInt8] {
     var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .noPadding).makeEncryptor()
     let firstChunk = try cipher.update(withBytes: data)
@@ -57,8 +55,6 @@ func aesCtrDecrypt(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UInt8] {
 }
 
 
-// Question: these return strings on the main identity library, but the non legacy ones return buffers.
-// Suspect in javascript they're interchangable, but not in Swift. Sticking with Buffers (i.e. UInt8 arrays) for both for consistency, is this ok?
 func aesCtrEncryptLegacy(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UInt8] {
     var cipher = try AES(key: key, blockMode: CTR(iv: iv), padding: .pkcs7).makeEncryptor()
     return try cipher.update(withBytes: data)
@@ -109,13 +105,14 @@ func verify(publicKey: [UInt8], msg: [UInt8], sig: [UInt8]) throws -> Bool {
 
 /**
  ECDH
+ This function derives a point from a private key and a non matching public key, and returns the X coordinate of the derived point
  */
-func derive(privateKeyA: [UInt8], publicKeyB: [UInt8]) throws -> [UInt8] {
+func deriveX(privateKeyA: [UInt8], publicKeyB: [UInt8]) throws -> [UInt8] {
     let keyA = BInt(magnitude: privateKeyA)
     let keyB = try ec.decodePoint(publicKeyB)
     
-    let derived = ec.multiply(keyB, keyA)
-    return try ec.encodePoint(derived)
+    let derived = ec.multiply(keyB, keyA).x
+    return derived.asMagnitudeBytes()
 }
 
 /**
@@ -126,7 +123,7 @@ func encrypt(publicKeyTo: [UInt8], msg: [UInt8], ephemPrivateKey: [UInt8]? = nil
     let ephemPrivateKey = try ephemPrivateKey ?? randomBytes(count: 32)
     let ephemPublicKey = try getPublicKey(from: ephemPrivateKey)
     
-    let sharedPx = try derive(privateKeyA: ephemPrivateKey, publicKeyB: publicKeyTo)
+    let sharedPx = try deriveX(privateKeyA: ephemPrivateKey, publicKeyB: publicKeyTo)
     let hash =  kdf(secret: sharedPx, outputLength: 32)
     let iv = try iv ?? randomBytes(count: 16)
     let encryptionKey = hash.slice(from: 0, to: 16)
@@ -159,7 +156,7 @@ func decrypt(privateKey: [UInt8], encrypted: [UInt8], legacy: Bool = false) thro
     let msgMac = encrypted.slice(from: 65 + 16 + cipherTextLength)
     
     // check HMAC
-    let px = try derive(privateKeyA: privateKey, publicKeyB: ephemPublicKey)
+    let px = try deriveX(privateKeyA: privateKey, publicKeyB: ephemPublicKey)
     let hash = kdf(secret: px, outputLength: 32)
     let encryptionKey = hash.slice(from: 0, to: 16)
     let macKey = Hash.sha256(hash.slice(from: 16))
@@ -180,7 +177,7 @@ func encryptShared(privateKeySender: [UInt8],
                    msg: [UInt8],
                    ephemPrivateKey: [UInt8]? = nil,
                    iv: [UInt8]? = nil) throws -> [UInt8] {
-    let sharedPx = try derive(privateKeyA: privateKeySender, publicKeyB: publicKeyRecipient)
+    let sharedPx = try deriveX(privateKeyA: privateKeySender, publicKeyB: publicKeyRecipient)
     return try encryptShared(sharedPx: sharedPx, msg: msg, ephemPrivateKey: ephemPrivateKey, iv: iv)
 }
 
@@ -202,7 +199,11 @@ func encryptShared(sharedPx: [UInt8],
  Using ECDH shared secret KDF
  */
 func decryptShared(privateKeyRecipient: [UInt8], publicKeySender: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
-    let sharedPx = try derive(privateKeyA: privateKeyRecipient, publicKeyB: publicKeySender)
+    let sharedPx = try deriveX(privateKeyA: privateKeyRecipient, publicKeyB: publicKeySender)
+    let sharedPxString = sharedPx.reduce(into: "") { res, cur in
+        res.append("\(cur),")
+    }
+    print(sharedPxString)
     return try decryptShared(sharedPx: sharedPx, encrypted: encrypted)
 }
 
@@ -215,7 +216,8 @@ func decryptShared(sharedPx: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
  Sign a Transaction Hex for submission
  */
 func signTransaction(seedHex: String, transactionHex: String) throws -> String {
-    let privateKey = try ECPrivateKey(domain: Domain.instance(curve: .EC256k1), s: BInt(seedHex, radix: 16)!)
+    guard let s = BInt(seedHex, radix: 16) else { throw CryptoError.badPrivateKey }
+    let privateKey = try ECPrivateKey(domain: Domain.instance(curve: .EC256k1), s: s)
     
     let transactionBytes = [UInt8](hex: transactionHex)
     let transactionHash = Hash.sha256(transactionBytes)

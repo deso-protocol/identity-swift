@@ -38,6 +38,42 @@
         }
       },
       {
+        "package": "Base16",
+        "repositoryURL": "https://github.com/alja7dali/swift-base16.git",
+        "state": {
+          "branch": null,
+          "revision": "4e452d40d08457bce120a621231e0b9e6815a9f8",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "Base58",
+        "repositoryURL": "https://github.com/Alja7dali/swift-base58.git",
+        "state": {
+          "branch": null,
+          "revision": "1eecf184e48d2702036663c7d238aab201bb9924",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "Bits",
+        "repositoryURL": "https://github.com/alja7dali/swift-bits.git",
+        "state": {
+          "branch": null,
+          "revision": "83668ec40d877d9e0012ba93359191cfc4bf04af",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "SHA256",
+        "repositoryURL": "https://github.com/alja7dali/swift-sha256.git",
+        "state": {
+          "branch": null,
+          "revision": "758852c8a92cacb8d125e152a2134b0cf9535e8e",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "SwiftECC",
         "repositoryURL": "https://github.com/leif-ibsen/SwiftECC",
         "state": {
