@@ -89,6 +89,8 @@ public class Identity {
         self.nodeBaseURL = nodeBaseURL
         self.network = network
         self.overrideIdentityURL = overrideIdentityURL
+        
+        // Get derived keys for stored users and refresh if necessary?
     }
 
     // TODO: When Swift 5.5. is widely available, update this to use async/await
