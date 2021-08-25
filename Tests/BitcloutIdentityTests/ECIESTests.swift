@@ -184,4 +184,10 @@ final class ECIESTests: XCTestCase {
 //        }
 //    }
     
+//    func testBase58Decode() {
+//        // public key (in Base58 prefixed format) to check
+//        let base58PK = ""
+//        let decodedPK = try? Base58CheckDecodePrefix(input: base58PK, prefixLen: 3)
+//        XCTAssertNotNil(decodedPK)
+//    }
 }

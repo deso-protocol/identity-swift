@@ -7,9 +7,11 @@
 
 import Foundation
 import Base58
+import CryptoSwift
 
 enum Base58Error: Error {
     case invalidFormat
+    case checksumError
 }
 
 func Base58CheckDecodePrefix(input: String, prefixLen: Int) throws -> (result: [UInt8], prefix: [UInt8]) {
@@ -18,13 +20,19 @@ func Base58CheckDecodePrefix(input: String, prefixLen: Int) throws -> (result: [
     if decoded.count < 5 {
         throw Base58Error.invalidFormat
     }
-// TODO: figure out checksums
-//        var cksum : [UInt8] = decoded.suffix(4) //[4]byte
-////        copy(cksum[:], decoded[len(decoded)-4:])
-//        if checksum(decoded[:len(decoded)-4]) != cksum {
-//            return nil, nil, errors.Wrap(fmt.Errorf("CheckDecode: Checksum does not match"), "")
-//        }
+
+    let toSum = decoded.slice(from: 0, to: decoded.count - 4)
+    guard checksum(toSum) == decoded.suffix(4) else {
+        throw Base58Error.checksumError
+    }
+    
     let prefix = decoded.prefix(prefixLen)
     let payload = decoded.slice(from: prefixLen, to: decoded.count - 4)
     return (payload, Array(prefix))
+}
+
+private func checksum(_ input: [UInt8]) -> [UInt8] {
+    let h = Hash.sha256(input)
+    let h2 = Hash.sha256(h)
+    return h2.slice(from: 0, to: 4)
 }
