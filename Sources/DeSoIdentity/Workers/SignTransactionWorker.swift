@@ -26,6 +26,6 @@ class SignTransactionWorker: TransactionSignable {
         
         // TODO: Can we check here if the derived key is still valid, or should we sign it, try to commit, and see if it fails?
         
-        return try BitcloutIdentity.signTransaction(seedHex: key.newPrivateKey, transactionHex: transaction.transactionHex)
+        return try DeSoIdentity.signTransaction(seedHex: key.newPrivateKey, transactionHex: transaction.transactionHex)
     }
 }

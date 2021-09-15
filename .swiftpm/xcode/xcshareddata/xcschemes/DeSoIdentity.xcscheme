@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BitcloutIdentity"
-               BuildableName = "BitcloutIdentity"
-               BlueprintName = "BitcloutIdentity"
+               BlueprintIdentifier = "DeSoIdentity"
+               BuildableName = "DeSoIdentity"
+               BlueprintName = "DeSoIdentity"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BitcloutIdentityTests"
-               BuildableName = "BitcloutIdentityTests"
-               BlueprintName = "BitcloutIdentityTests"
+               BlueprintIdentifier = "DeSoIdentityTests"
+               BuildableName = "DeSoIdentityTests"
+               BlueprintName = "DeSoIdentityTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -47,9 +47,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BitcloutIdentityTests"
-               BuildableName = "BitcloutIdentityTests"
-               BlueprintName = "BitcloutIdentityTests"
+               BlueprintIdentifier = "DeSoIdentityTests"
+               BuildableName = "DeSoIdentityTests"
+               BlueprintName = "DeSoIdentityTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -75,9 +75,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BitcloutIdentity"
-            BuildableName = "BitcloutIdentity"
-            BlueprintName = "BitcloutIdentity"
+            BlueprintIdentifier = "DeSoIdentity"
+            BuildableName = "DeSoIdentity"
+            BlueprintName = "DeSoIdentity"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

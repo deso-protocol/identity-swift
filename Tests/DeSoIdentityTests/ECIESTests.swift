@@ -12,7 +12,7 @@ import CryptoSwift
 import ASN1
 import Base58
 
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 final class ECIESTests: XCTestCase {
     

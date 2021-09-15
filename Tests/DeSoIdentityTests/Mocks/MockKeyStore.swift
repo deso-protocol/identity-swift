@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 class MockKeyStore: KeyInfoStorable {
     var mockInfo: DerivedKeyInfo? = DerivedKeyInfo(truePublicKey: "foo",
