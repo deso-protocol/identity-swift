@@ -17,7 +17,10 @@ class AuthWorker: Authable {
     
     func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
         // TODO: Confirm the correct URL and callback URL scheme. Obviously localhost will not work 😂
-        let session = ASWebAuthenticationSession(url: URL(string: "http://localhost:3000")!,
+        let baseUrl = "http://localhost:4200"
+//        let baseUrl = "https://identity.bitclout.com"
+        let url = baseUrl + "/derive" + "?callback=identity://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        let session = ASWebAuthenticationSession(url: URL(string: url)!,
                                                  callbackURLScheme: "identity") { url, error in
             guard let url = url else {
                 print(error?.localizedDescription ?? "No URL Returned")

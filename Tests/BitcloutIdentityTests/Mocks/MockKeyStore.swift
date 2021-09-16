@@ -9,11 +9,13 @@ import Foundation
 @testable import BitcloutIdentity
 
 class MockKeyStore: KeyInfoStorable {
-    var mockInfo: DerivedKeyInfo? = DerivedKeyInfo(truePublicKey: "foo",
-                                                  newPublicKey: "bar",
-                                                  newPrivateKey: "bat",
-                                                  signedHash: "bla",
-                                                  jwt: "joooot")
+    var mockInfo: DerivedKeyInfo? = DerivedKeyInfo(publicKey: "foo",
+                                                   derivedPublicKey: "bar",
+                                                   derivedSeedHex: "bat",
+                                                   btcDepositAddress: "12345",
+                                                   expirationBlock: 23,
+                                                   accessSignature: "djadlvjbdsljvb",
+                                                   network: .testnet)
     
     var mockSharedSecret: SharedSecret? = SharedSecret(secret: "foo",
                                                        privateKey: "bar",

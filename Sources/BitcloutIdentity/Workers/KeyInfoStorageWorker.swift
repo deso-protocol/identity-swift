@@ -39,7 +39,7 @@ class KeyInfoStorageWorker: KeyInfoStorable {
     func store(_ info: DerivedKeyInfo) throws {
         var storedInfo = try getExistingDerivedKeyInfo() ?? [:]
         let data = try JSONEncoder().encode(info)
-        storedInfo[info.truePublicKey] = data
+        storedInfo[info.publicKey] = data
         try setKeyInfoOnKeychain(storedInfo)
     }
     
