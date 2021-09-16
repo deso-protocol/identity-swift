@@ -9,17 +9,20 @@ import Foundation
 import AuthenticationServices
 
 protocol Authable {
-    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?)
+    func presentAuthSession(context: PresentationContextProvidable, on network: Network, with completion: Identity.LoginCompletion?)
 }
 
 class AuthWorker: Authable {
     private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
-    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
+    func presentAuthSession(context: PresentationContextProvidable, on network: Network, with completion: Identity.LoginCompletion?) {
         // TODO: Confirm the correct URL and callback URL scheme. Obviously localhost will not work 😂
         let baseUrl = "http://localhost:4200"
 //        let baseUrl = "https://identity.bitclout.com"
-        let url = baseUrl + "/derive" + "?callback=identity://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        var url = baseUrl + "/derive" + "?callback=identity://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        if network == .testnet {
+            url = url + "&testnet=true"
+        }
         let session = ASWebAuthenticationSession(url: URL(string: url)!,
                                                  callbackURLScheme: "identity") { url, error in
             guard let url = url else {

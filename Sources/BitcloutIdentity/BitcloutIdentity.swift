@@ -17,6 +17,7 @@ public class Identity {
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
     private let context: PresentationContextProvidable
+    private let network: Network
     
     public convenience init() throws {
         #if os(iOS)
@@ -47,7 +48,8 @@ public class Identity {
         transactionSigner: TransactionSignable,
         messageDecrypter: MessageDecryptable,
         jwtWorker: JWTFetchable,
-        context: PresentationContextProvidable
+        context: PresentationContextProvidable,
+        network: Network = .mainnet
     ) {
         self.authWorker = authWorker
         self.keyStore = keyStore
@@ -55,6 +57,7 @@ public class Identity {
         self.messageDecrypter = messageDecrypter
         self.jwtWorker = jwtWorker
         self.context = context
+        self.network = network
     }
 
     // TODO: When Swift 5.5. is widely available, update this to use async/await
@@ -63,7 +66,7 @@ public class Identity {
      - Parameter completion: Will be called on completion of the login flow
      */
     public func login(_ completion: LoginCompletion? ) {
-        authWorker.presentAuthSession(context: context, with: completion)
+        authWorker.presentAuthSession(context: context, on: self.network, with: completion)
     }
 
     /**

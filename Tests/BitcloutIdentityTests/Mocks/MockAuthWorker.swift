@@ -11,9 +11,13 @@ import Foundation
 class MockAuthWorker: Authable {
     var calledPresentAuthSession: Bool = false
     var contextProvided: PresentationContextProvidable?
-    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
+    var networkRequested: Network?
+    func presentAuthSession(context: PresentationContextProvidable,
+                            on network: Network,
+                            with completion: Identity.LoginCompletion?) {
         calledPresentAuthSession = true
         contextProvided = context
+        networkRequested = network
         completion?(nil, nil)
     }
 }
