@@ -21,15 +21,19 @@ class AuthWorker: Authable {
             url = overrideUrl
         } else {
             let baseUrl = "https://identity.bitclout.com"
-            url = baseUrl + "/derive" + "?callback=identity://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+            url = baseUrl + "/derive"
         }
-        
+        let callbackScheme = (Bundle.main.bundleIdentifier ?? UUID().uuidString) + ".identity"
+        url = url
+            + "?callback="
+            + callbackScheme.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+            + "://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         if network == .testnet {
             url = url + "&testnet=true"
         }
         
         let session = ASWebAuthenticationSession(url: URL(string: url)!,
-                                                 callbackURLScheme: "identity") { url, error in
+                                                 callbackURLScheme: callbackScheme) { url, error in
             guard let url = url else {
                 print(error?.localizedDescription ?? "No URL Returned")
                 return
