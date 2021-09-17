@@ -51,7 +51,7 @@ class AuthWorker: Authable {
             }
         }
         session.presentationContextProvider = context
-        session.prefersEphemeralWebBrowserSession = false
+        session.prefersEphemeralWebBrowserSession = true
         session.start()
     }
 }
