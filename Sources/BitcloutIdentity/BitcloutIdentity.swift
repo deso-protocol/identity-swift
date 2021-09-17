@@ -71,7 +71,7 @@ public class Identity {
      - Parameter completion: Will be called on completion of the login flow
      */
     public func login(_ completion: LoginCompletion? ) {
-        authWorker.presentAuthSession(context: context, on: self.network, baseUrl: overrideIdentityURL, with: completion)
+        authWorker.presentAuthSession(context: context, on: self.network, overrideUrl: overrideIdentityURL, with: completion)
     }
 
     /**

@@ -12,15 +12,15 @@ class MockAuthWorker: Authable {
     var calledPresentAuthSession: Bool = false
     var contextProvided: PresentationContextProvidable?
     var networkRequested: Network?
-    var baseUrlSet: String?
+    var overrideUrlSet: String?
     func presentAuthSession(context: PresentationContextProvidable,
                             on network: Network,
-                            baseUrl: String?,
+                            overrideUrl: String?,
                             with completion: Identity.LoginCompletion?) {
         calledPresentAuthSession = true
         contextProvided = context
         networkRequested = network
-        baseUrlSet = baseUrl
+        overrideUrlSet = overrideUrl
         completion?(nil, nil)
     }
 }
