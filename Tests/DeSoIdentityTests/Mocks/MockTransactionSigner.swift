@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 class MockTransactionSigner: TransactionSignable {
     var mockSignedHex: String = "foobarbat"

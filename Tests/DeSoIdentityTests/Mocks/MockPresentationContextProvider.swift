@@ -7,7 +7,7 @@
 
 import Foundation
 import AuthenticationServices
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 class MockPresentationContextProvider: NSObject, PresentationContextProvidable {
     #if os(iOS)

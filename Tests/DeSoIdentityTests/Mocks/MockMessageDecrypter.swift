@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 class MockMessageDecrypter: MessageDecryptable {
     var mockDecryptedMessages = ["foo": ["bar"], "bar": ["bat"], "bat": ["foo"]]

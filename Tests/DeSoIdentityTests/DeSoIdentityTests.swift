@@ -1,7 +1,7 @@
     import XCTest
-    @testable import BitcloutIdentity
+    @testable import DeSoIdentity
     
-    final class BitcloutIdentityTests: XCTestCase {
+    final class DeSoIdentityTests: XCTestCase {
         var sut: Identity!
         var authWorker: MockAuthWorker!
         var keyStore: MockKeyStore!

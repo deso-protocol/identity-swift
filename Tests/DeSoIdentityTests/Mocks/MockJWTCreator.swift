@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import BitcloutIdentity
+@testable import DeSoIdentity
 
 class MockJWTCreator: JWTFetchable {
     var mockJWT = "foobarJWT"
