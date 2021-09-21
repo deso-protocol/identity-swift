@@ -17,8 +17,10 @@ public class Identity {
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
     private let context: PresentationContextProvidable
+    private let network: Network
+    private let overrideIdentityURL: String?
     
-    public convenience init() throws {
+    public convenience init(network: Network = .mainnet, overrideIdentityURL: String? = nil) throws {
         #if os(iOS)
         guard let window = UIApplication.shared.windows.first else {
             throw IdentityError.missingPresentationAnchor
@@ -37,7 +39,9 @@ public class Identity {
             transactionSigner: SignTransactionWorker(),
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),
-            context: context
+            context: context,
+            network: network,
+            overrideIdentityURL: overrideIdentityURL
         )
     }
     
@@ -47,7 +51,9 @@ public class Identity {
         transactionSigner: TransactionSignable,
         messageDecrypter: MessageDecryptable,
         jwtWorker: JWTFetchable,
-        context: PresentationContextProvidable
+        context: PresentationContextProvidable,
+        network: Network,
+        overrideIdentityURL: String?
     ) {
         self.authWorker = authWorker
         self.keyStore = keyStore
@@ -55,6 +61,8 @@ public class Identity {
         self.messageDecrypter = messageDecrypter
         self.jwtWorker = jwtWorker
         self.context = context
+        self.network = network
+        self.overrideIdentityURL = overrideIdentityURL
     }
 
     // TODO: When Swift 5.5. is widely available, update this to use async/await
@@ -63,7 +71,7 @@ public class Identity {
      - Parameter completion: Will be called on completion of the login flow
      */
     public func login(_ completion: LoginCompletion? ) {
-        authWorker.presentAuthSession(context: context, with: completion)
+        authWorker.presentAuthSession(context: context, on: self.network, overrideUrl: overrideIdentityURL, with: completion)
     }
 
     /**

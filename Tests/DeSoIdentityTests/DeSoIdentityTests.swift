@@ -24,7 +24,9 @@
                 transactionSigner: transactionSigner,
                 messageDecrypter: messageDecrypter,
                 jwtWorker: jwtCreator,
-                context: context
+                context: context,
+                network: .testnet,
+                overrideIdentityURL: nil
             )
         }
         

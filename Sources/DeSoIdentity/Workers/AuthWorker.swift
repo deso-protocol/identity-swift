@@ -9,16 +9,31 @@ import Foundation
 import AuthenticationServices
 
 protocol Authable {
-    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?)
+    func presentAuthSession(context: PresentationContextProvidable, on network: Network, overrideUrl: String?, with completion: Identity.LoginCompletion?)
 }
 
 class AuthWorker: Authable {
     private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
-    func presentAuthSession(context: PresentationContextProvidable, with completion: Identity.LoginCompletion?) {
-        // TODO: Confirm the correct URL and callback URL scheme. Obviously localhost will not work 😂
-        let session = ASWebAuthenticationSession(url: URL(string: "http://localhost:3000")!,
-                                                 callbackURLScheme: "identity") { url, error in
+    func presentAuthSession(context: PresentationContextProvidable, on network: Network, overrideUrl: String?, with completion: Identity.LoginCompletion?) {
+        var url: String
+        if let overrideUrl = overrideUrl {
+            url = overrideUrl
+        } else {
+            let baseUrl = "https://identity.bitclout.com"
+            url = baseUrl + "/derive"
+        }
+        let callbackScheme = (Bundle.main.bundleIdentifier ?? UUID().uuidString) + ".identity"
+        url = url
+            + "?callback="
+            + callbackScheme.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+            + "://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        if network == .testnet {
+            url = url + "&testnet=true"
+        }
+        
+        let session = ASWebAuthenticationSession(url: URL(string: url)!,
+                                                 callbackURLScheme: callbackScheme) { url, error in
             guard let url = url else {
                 print(error?.localizedDescription ?? "No URL Returned")
                 return

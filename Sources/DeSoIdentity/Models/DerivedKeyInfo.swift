@@ -7,30 +7,42 @@
 
 import Foundation
 
+public enum Network: String, Codable {
+    case mainnet
+    case testnet
+}
+
 // TODO: Confirm this. Does it need more info, e.g. the access level?
 public struct DerivedKeyInfo: Codable {
-    public let truePublicKey: String
-    public let newPublicKey: String
-    public let newPrivateKey: String
-    public let signedHash: String
-    public let jwt: String
+    public let publicKey: String
+    public let derivedPublicKey: String
+    public let derivedSeedHex: String
+    public let btcDepositAddress: String
+    public let expirationBlock: Int
+    public let accessSignature: String
+    public let network: Network
 }
 
 extension DerivedKeyInfo {
     init?(_ query: [URLQueryItem]) {
         // TODO: Confirm with Identity web app if this matches how the data will be returned from the auth session
-        guard let truePubKey = query.first(where: { $0.name == "truePublicKey" })?.value,
-              let newPubKey = query.first(where: { $0.name == "newPublicKey" })?.value,
-              let newPrivateKey = query.first(where: { $0.name == "newPrivateKey" })?.value,
-              let signedHash = query.first(where: { $0.name == "signedHash" })?.value,
-              let jwt = query.first(where: { $0.name == "jwt" })?.value else {
+        guard let truePubKey = query.first(where: { $0.name == "publicKey" })?.value,
+              let newPubKey = query.first(where: { $0.name == "derivedPublicKey" })?.value,
+              let newPrivateKey = query.first(where: { $0.name == "derivedSeedHex" })?.value,
+              let signedHash = query.first(where: { $0.name == "accessSignature" })?.value,
+              let btcDepositAddress = query.first(where: { $0.name == "btcDepositAddress" })?.value,
+              let network = Network(rawValue: query.first(where: { $0.name == "network" })?.value ?? ""),
+              let expirationBlockValue = query.first(where: { $0.name == "expirationBlock" })?.value,
+              let expirationBlock = Int(expirationBlockValue) else {
             return nil
         }
         
-        self.truePublicKey = truePubKey
-        self.newPublicKey = newPubKey
-        self.newPrivateKey = newPrivateKey
-        self.signedHash = signedHash
-        self.jwt = jwt
+        self.publicKey = truePubKey
+        self.derivedPublicKey = newPubKey
+        self.derivedSeedHex = newPrivateKey
+        self.accessSignature = signedHash
+        self.btcDepositAddress = btcDepositAddress
+        self.network = network
+        self.expirationBlock = expirationBlock
     }
 }
