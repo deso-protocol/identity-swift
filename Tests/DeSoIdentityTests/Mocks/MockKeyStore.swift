@@ -15,7 +15,8 @@ class MockKeyStore: KeyInfoStorable {
                                                    btcDepositAddress: "12345",
                                                    expirationBlock: 23,
                                                    accessSignature: "djadlvjbdsljvb",
-                                                   network: .testnet)
+                                                   network: .testnet,
+                                                   jwt: "jooooot")
     
     var mockSharedSecret: SharedSecret? = SharedSecret(secret: "foo",
                                                        privateKey: "bar",

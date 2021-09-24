@@ -25,9 +25,10 @@ class AuthWorker: Authable {
         }
         let callbackScheme = (Bundle.main.bundleIdentifier ?? UUID().uuidString) + ".identity"
         url = url
-            + "?callback="
-            + callbackScheme.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
-            + "://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        + "?callback="
+        + callbackScheme.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+        + "://".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
+        + "&webview=true"
         if network == .testnet {
             url = url + "&testnet=true"
         }

@@ -27,6 +27,6 @@ class JWTWorker: JWTFetchable {
         
         // TODO: Check if derived key is expired and get a new one if necessary?
         
-        return ""
+        return keyInfo.jwt
     }
 }
