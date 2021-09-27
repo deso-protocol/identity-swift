@@ -22,6 +22,7 @@ public struct DerivedKeyInfo: Codable {
     public let accessSignature: String
     public let network: Network
     public let jwt: String
+    public let derivedJwt: String
 }
 
 extension DerivedKeyInfo {
@@ -33,9 +34,10 @@ extension DerivedKeyInfo {
               let signedHash = query.first(where: { $0.name == "accessSignature" })?.value,
               let btcDepositAddress = query.first(where: { $0.name == "btcDepositAddress" })?.value,
               let network = Network(rawValue: query.first(where: { $0.name == "network" })?.value ?? ""),
-              let expirationBlockValue = query.first(where: { $0.name == "expirationBloxck" })?.value,
+              let expirationBlockValue = query.first(where: { $0.name == "expirationBlock" })?.value,
               let expirationBlock = Int(expirationBlockValue),
-              let jwt = query.first(where: { $0.name == "jwt" })?.value else {
+              let jwt = query.first(where: { $0.name == "jwt" })?.value,
+              let derivedJwt = query.first(where: { $0.name == "derivedJwt" })?.value else {
             return nil
         }
         
@@ -47,5 +49,6 @@ extension DerivedKeyInfo {
         self.network = network
         self.expirationBlock = expirationBlock
         self.jwt = jwt
+        self.derivedJwt = derivedJwt
     }
 }

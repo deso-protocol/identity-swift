@@ -16,7 +16,8 @@ class MockKeyStore: KeyInfoStorable {
                                                    expirationBlock: 23,
                                                    accessSignature: "djadlvjbdsljvb",
                                                    network: .testnet,
-                                                   jwt: "jooooot")
+                                                   jwt: "jooooot",
+                                                   derivedJwt: "tooooooj")
     
     var mockSharedSecret: SharedSecret? = SharedSecret(secret: "foo",
                                                        privateKey: "bar",
