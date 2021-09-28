@@ -12,7 +12,7 @@ public class Identity {
     public typealias LoginCompletion = ((_ loggedInPublicKeys: [String]?, _ error: Error?) -> Void)
     
     private let authWorker: Authable
-    private let keyStore: KeyInfoStorable
+    private var keyStore: KeyInfoStorable
     private let transactionSigner: TransactionSignable
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
@@ -33,9 +33,15 @@ public class Identity {
         let context = PresentationContextProvider(anchor: window)
         #endif
         
+        #if TARGET_IPHONE_SIMULATOR
+        let keyStore = EphemeralKeyStore()
+        #else
+        let keyStore = KeyInfoStorageWorker()
+        #endif
+        
         self.init(
             authWorker: AuthWorker(),
-            keyStore: KeyInfoStorageWorker(),
+            keyStore: keyStore,
             transactionSigner: SignTransactionWorker(),
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),

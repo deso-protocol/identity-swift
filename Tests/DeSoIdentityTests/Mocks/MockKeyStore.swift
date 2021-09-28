@@ -9,6 +9,7 @@ import Foundation
 @testable import DeSoIdentity
 
 class MockKeyStore: KeyInfoStorable {
+    var keychain: DataStorable = [String: String]()
     var mockInfo: DerivedKeyInfo? = DerivedKeyInfo(publicKey: "foo",
                                                    derivedPublicKey: "bar",
                                                    derivedSeedHex: "bat",

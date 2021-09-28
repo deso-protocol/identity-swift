@@ -8,26 +8,43 @@
 import Foundation
 import KeychainAccess
 
+enum Keys: String {
+    case derivedKeyInfo
+    case sharedSecrets
+}
+
 protocol KeyInfoStorable {
-    func store(_ info: DerivedKeyInfo) throws
-    func store(sharedSecret: SharedSecret) throws
-    func clearAllStoredInfo() throws
-    func clearDerivedKeyInfo(for publicKey: String) throws
-    func clearAllSharedSecrets(for privateKey: String) throws
-    func clearSharedSecret(for privateKey: String, and publicKey: String) throws
+    var keychain: DataStorable { get set }
+    mutating func store(_ info: DerivedKeyInfo) throws
+    mutating func store(sharedSecret: SharedSecret) throws
+    mutating func clearAllStoredInfo() throws
+    mutating func clearDerivedKeyInfo(for publicKey: String) throws
+    mutating func clearAllSharedSecrets(for privateKey: String) throws
+    mutating func clearSharedSecret(for privateKey: String, and publicKey: String) throws
     func getDerivedKeyInfo(for publicKey: String) throws -> DerivedKeyInfo?
     func getAllStoredKeys() throws -> [String]
     func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret?
     func getAllSharedSecrets() throws -> [SharedSecret]
 }
 
+protocol DataStorable {
+    func getData(_ key: String) throws -> Data?
+    mutating func set(_ value: Data, key: String) throws
+    mutating func remove(_ key: String) throws
+}
+
+/**
+ Ephemeral Key store for use when storage to the keychain is not desired or supported, e.g. when testing on simulator
+ */
+class EphemeralKeyStore: KeyInfoStorable {
+    var keychain: DataStorable = [String: String]()
+}
+
+/**
+ KeyInfoStorageWorker will store and retrieve key information from the secure device keychain
+ */
 class KeyInfoStorageWorker: KeyInfoStorable {
-    private enum Keys: String {
-        case derivedKeyInfo
-        case sharedSecrets
-    }
-    
-    private let keychain: Keychain
+    var keychain: DataStorable
     
     init() {
         guard let bundleId = Bundle.main.bundleIdentifier else {
@@ -35,15 +52,46 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         }
         self.keychain = Keychain(service: bundleId)
     }
+}
+
+extension Keychain: DataStorable {
+    func getData(_ key: String) throws -> Data? {
+        return try getData(key, ignoringAttributeSynchronizable: true)
+    }
     
-    func store(_ info: DerivedKeyInfo) throws {
+    func remove(_ key: String) throws {
+        try remove(key, ignoringAttributeSynchronizable: true)
+    }
+    
+    func set(_ value: Data, key: String) throws {
+        try set(value, key: key, ignoringAttributeSynchronizable: true)
+    }
+}
+
+extension Dictionary: DataStorable where Key == String, Value == String {
+    func getData(_ key: String) throws -> Data? {
+        guard let string = self[key] else { return nil }
+        return Data(base64Encoded: string)
+    }
+    
+    mutating func set(_ value: Data, key: String) throws {
+        self[key] = value.base64EncodedString()
+    }
+    
+    mutating func remove(_ key: String) throws {
+        self[key] = nil
+    }
+}
+
+extension KeyInfoStorable {
+    mutating func store(_ info: DerivedKeyInfo) throws {
         var storedInfo = try getExistingDerivedKeyInfo() ?? [:]
         let data = try JSONEncoder().encode(info)
         storedInfo[info.publicKey] = data
         try setKeyInfoOnKeychain(storedInfo)
     }
     
-    func store(sharedSecret: SharedSecret) throws {
+    mutating func store(sharedSecret: SharedSecret) throws {
         var storedSecrets = try getExistingSharedSecrets() ?? []
         if let existingIndex = storedSecrets
             .firstIndex(
@@ -59,18 +107,18 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         try setSharedSecretsOnKeychain(storedSecrets)
     }
     
-    func clearAllStoredInfo() throws {
+    mutating func clearAllStoredInfo() throws {
         try keychain.remove(Keys.derivedKeyInfo.rawValue)
         try keychain.remove(Keys.sharedSecrets.rawValue)
     }
     
-    func clearDerivedKeyInfo(for publicKey: String) throws {
+    mutating func clearDerivedKeyInfo(for publicKey: String) throws {
         guard var storedInfo = try getExistingDerivedKeyInfo() else { return }
         storedInfo[publicKey] = nil
         try setKeyInfoOnKeychain(storedInfo)
     }
     
-    func clearAllSharedSecrets(for privateKey: String) throws {
+    mutating func clearAllSharedSecrets(for privateKey: String) throws {
         guard var storedSecrets = try getExistingSharedSecrets() else { return }
         storedSecrets.removeAll(where: {
             $0.privateKey == privateKey
@@ -78,7 +126,7 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         try setSharedSecretsOnKeychain(storedSecrets)
     }
     
-    func clearSharedSecret(for privateKey: String, and publicKey: String) throws {
+    mutating func clearSharedSecret(for privateKey: String, and publicKey: String) throws {
         guard var storedSecrets = try getExistingSharedSecrets() else { return }
         storedSecrets.removeAll(where: {
             $0.privateKey == privateKey &&
@@ -117,7 +165,7 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         return try JSONDecoder().decode([String: Data].self, from: data)
     }
     
-    private func setKeyInfoOnKeychain(_ info: [String: Data]) throws {
+    private mutating func setKeyInfoOnKeychain(_ info: [String: Data]) throws {
         let keychainData = try JSONEncoder().encode(info)
         try keychain.set(keychainData, key: Keys.derivedKeyInfo.rawValue)
     }
@@ -127,7 +175,7 @@ class KeyInfoStorageWorker: KeyInfoStorable {
         return try JSONDecoder().decode([SharedSecret].self, from: data)
     }
     
-    private func setSharedSecretsOnKeychain(_ secrets: [SharedSecret]) throws {
+    private mutating func setSharedSecretsOnKeychain(_ secrets: [SharedSecret]) throws {
         let keychainData = try JSONEncoder().encode(secrets)
         try keychain.set(keychainData, key: Keys.sharedSecrets.rawValue)
     }

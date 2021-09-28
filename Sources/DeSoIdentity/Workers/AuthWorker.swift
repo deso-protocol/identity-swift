@@ -13,7 +13,7 @@ protocol Authable {
 }
 
 class AuthWorker: Authable {
-    private let keyStore: KeyInfoStorable = KeyInfoStorageWorker()
+    private var keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
     func presentAuthSession(context: PresentationContextProvidable, on network: Network, overrideUrl: String?, with completion: Identity.LoginCompletion?) {
         var url: String
