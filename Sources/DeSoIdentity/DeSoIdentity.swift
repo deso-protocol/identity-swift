@@ -33,7 +33,7 @@ public class Identity {
         let context = PresentationContextProvider(anchor: window)
         #endif
         
-        #if TARGET_IPHONE_SIMULATOR
+        #if targetEnvironment(simulator)
         let keyStore = EphemeralKeyStore()
         #else
         let keyStore = KeyInfoStorageWorker()
