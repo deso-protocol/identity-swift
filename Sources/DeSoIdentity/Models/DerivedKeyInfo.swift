@@ -13,7 +13,7 @@ public enum Network: String, Codable {
 }
 
 // TODO: Confirm this. Does it need more info, e.g. the access level?
-public struct DerivedKeyInfo: Codable {
+public struct DerivedKeyInfo: Codable, Equatable {
     public let publicKey: String
     public let derivedPublicKey: String
     public let derivedSeedHex: String

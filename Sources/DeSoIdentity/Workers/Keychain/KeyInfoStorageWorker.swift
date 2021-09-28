@@ -8,7 +8,7 @@
 import Foundation
 import KeychainAccess
 
-enum Keys: String {
+enum StorableKeys: String {
     case derivedKeyInfo
     case sharedSecrets
 }
@@ -108,8 +108,8 @@ extension KeyInfoStorable {
     }
     
     mutating func clearAllStoredInfo() throws {
-        try keychain.remove(Keys.derivedKeyInfo.rawValue)
-        try keychain.remove(Keys.sharedSecrets.rawValue)
+        try keychain.remove(StorableKeys.derivedKeyInfo.rawValue)
+        try keychain.remove(StorableKeys.sharedSecrets.rawValue)
     }
     
     mutating func clearDerivedKeyInfo(for publicKey: String) throws {
@@ -141,8 +141,8 @@ extension KeyInfoStorable {
     }
     
     func getAllStoredKeys() throws -> [String] {
-        guard let data = try keychain.getData(Keys.derivedKeyInfo.rawValue) else { return [] }
-        let storedData = try JSONDecoder().decode([String: DerivedKeyInfo].self, from: data)
+        guard let data = try keychain.getData(StorableKeys.derivedKeyInfo.rawValue) else { return [] }
+        let storedData = try JSONDecoder().decode([String: Data].self, from: data)
         return storedData.keys.map { $0 }
     }
     
@@ -155,28 +155,28 @@ extension KeyInfoStorable {
     }
     
     func getAllSharedSecrets() throws -> [SharedSecret] {
-        guard let data = try keychain.getData(Keys.sharedSecrets.rawValue) else { return [] }
+        guard let data = try keychain.getData(StorableKeys.sharedSecrets.rawValue) else { return [] }
         let storedData = try JSONDecoder().decode([SharedSecret].self, from: data)
         return storedData
     }
     
     private func getExistingDerivedKeyInfo() throws -> [String: Data]? {
-        guard let data = try keychain.getData(Keys.derivedKeyInfo.rawValue) else { return nil }
+        guard let data = try keychain.getData(StorableKeys.derivedKeyInfo.rawValue) else { return nil }
         return try JSONDecoder().decode([String: Data].self, from: data)
     }
     
     private mutating func setKeyInfoOnKeychain(_ info: [String: Data]) throws {
         let keychainData = try JSONEncoder().encode(info)
-        try keychain.set(keychainData, key: Keys.derivedKeyInfo.rawValue)
+        try keychain.set(keychainData, key: StorableKeys.derivedKeyInfo.rawValue)
     }
     
     private func getExistingSharedSecrets() throws -> [SharedSecret]? {
-        guard let data = try keychain.getData(Keys.sharedSecrets.rawValue) else { return nil }
+        guard let data = try keychain.getData(StorableKeys.sharedSecrets.rawValue) else { return nil }
         return try JSONDecoder().decode([SharedSecret].self, from: data)
     }
     
     private mutating func setSharedSecretsOnKeychain(_ secrets: [SharedSecret]) throws {
         let keychainData = try JSONEncoder().encode(secrets)
-        try keychain.set(keychainData, key: Keys.sharedSecrets.rawValue)
+        try keychain.set(keychainData, key: StorableKeys.sharedSecrets.rawValue)
     }
 }
