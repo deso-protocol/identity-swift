@@ -4,12 +4,20 @@ import AuthenticationServices
  The main entry point for the library
  */
 public class Identity {
+    
+    /**
+        The possible responses when login is called
+     */
+    public enum LoginResponse {
+        case success(selectedPublicKey: String, allLoadedPublicKeys: [String])
+        case failed(error: Error)
+    }
+    
     /**
      Completion handler called upon successful login.
-     - Parameter loggedInPublicKeys: On success, an array of all the currently loaded accounts. On failure, nil.
-     - Parameter error: On success, nil, on failure, the error returned.
+     - Parameter response: the response of the login request
      */
-    public typealias LoginCompletion = ((_ loggedInPublicKeys: [String]?, _ error: Error?) -> Void)
+    public typealias LoginCompletion = ((_ response: LoginResponse) -> Void)
     
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
@@ -76,7 +84,7 @@ public class Identity {
      Call this to log in to one or more accounts.
      - Parameter completion: Will be called on completion of the login flow
      */
-    public func login(_ completion: LoginCompletion? ) {
+    public func login(_ completion: @escaping LoginCompletion ) {
         authWorker.presentAuthSession(context: context, on: self.network, overrideUrl: overrideIdentityURL, with: completion)
     }
 

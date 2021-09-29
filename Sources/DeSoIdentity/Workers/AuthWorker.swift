@@ -9,13 +9,17 @@ import Foundation
 import AuthenticationServices
 
 protocol Authable {
-    func presentAuthSession(context: PresentationContextProvidable, on network: Network, overrideUrl: String?, with completion: Identity.LoginCompletion?)
+    func presentAuthSession(context: PresentationContextProvidable,
+                            on network: Network, overrideUrl: String?,
+                            with completion: @escaping Identity.LoginCompletion)
 }
 
 class AuthWorker: Authable {
     private var keyStore: KeyInfoStorable = KeyInfoStorageWorker()
     
-    func presentAuthSession(context: PresentationContextProvidable, on network: Network, overrideUrl: String?, with completion: Identity.LoginCompletion?) {
+    func presentAuthSession(context: PresentationContextProvidable,
+                            on network: Network, overrideUrl: String?,
+                            with completion: @escaping Identity.LoginCompletion) {
         var url: String
         if let overrideUrl = overrideUrl {
             url = overrideUrl
@@ -49,10 +53,10 @@ class AuthWorker: Authable {
             do {
                 try self.keyStore.store(keyData)
                 let allKeys = try self.keyStore.getAllStoredKeys()
-                completion?(allKeys, nil)
+                completion(.success(selectedPublicKey: keyData.publicKey, allLoadedPublicKeys: allKeys))
             } catch {
                 print(error.localizedDescription)
-                completion?(nil, error)
+                completion(.failed(error: error))
             }
         }
         session.presentationContextProvider = context

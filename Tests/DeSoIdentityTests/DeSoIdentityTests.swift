@@ -32,7 +32,7 @@
         
         func testLoginCallsAuthWorker() {
             let expectation = self.expectation(description: "completion")
-            sut.login() { _,_ in
+            sut.login() { _ in
                 expectation.fulfill()
             }
             waitForExpectations(timeout: 5, handler: nil)

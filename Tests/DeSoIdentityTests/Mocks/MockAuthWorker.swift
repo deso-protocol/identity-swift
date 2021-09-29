@@ -16,11 +16,11 @@ class MockAuthWorker: Authable {
     func presentAuthSession(context: PresentationContextProvidable,
                             on network: Network,
                             overrideUrl: String?,
-                            with completion: Identity.LoginCompletion?) {
+                            with completion: @escaping Identity.LoginCompletion) {
         calledPresentAuthSession = true
         contextProvided = context
         networkRequested = network
         overrideUrlSet = overrideUrl
-        completion?(nil, nil)
+        completion(.success(selectedPublicKey: "foo", allLoadedPublicKeys: ["bar", "bat"]))
     }
 }
