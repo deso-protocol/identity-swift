@@ -4,9 +4,8 @@ import AuthenticationServices
  The main entry point for the library
  */
 public class Identity {
-    
     /**
-        The possible responses when login is called
+     The possible responses when login is called
      */
     public enum LoginResponse {
         case success(selectedPublicKey: String, allLoadedPublicKeys: [String])
@@ -20,12 +19,18 @@ public class Identity {
     public typealias LoginCompletion = ((_ response: LoginResponse) -> Void)
     
     /**
-     Completion handler called upon successful submission of a signed transaction
-     - Parameter statusCode: The HTTP status code of the request, if it was actually sent, nil otherwise
-     - Parameter responseBody: A Decodable object containing the response body, if present, nil otherwise
-     - Parameter error: On success nil, on failure, the error returned
+     The possible responses when attempting to sign a transaction
      */
-    public typealias TransactionCompletion<T: Decodable> = ((_ statusCode: Int?, _ responseBody: T?, _ error: Error?) -> Void)
+    public enum TransactionResponse {
+        case success(statusCode: Int, response: Data)
+        case failed(statusCode: Int, error: Error)
+    }
+    
+    /**
+     Completion handler called upon successful submission of a signed transaction
+     - Parameter response: The response of the transaction signing request
+     */
+    public typealias TransactionCompletion = ((_ response: TransactionResponse) -> Void)
     
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
@@ -147,7 +152,7 @@ public class Identity {
      - Parameter transaction: an `UnsignedTransaction` object to be signed
      - Parameter completion: a `TransactionCompletion` block that will be called upon completion of the sign/submission process
      */
-    public func signAndSubmit<T: Decodable>(_ transaction: UnsignedTransaction, completion: TransactionCompletion<T>?) throws {
+    public func signAndSubmit(_ transaction: UnsignedTransaction, completion: TransactionCompletion?) throws {
         // TODO: sign transaction, handle possible unauthorized key error, then submit the signed transaction and return the expected response body
         // QUESTION: Is it appropriate to require the client to define the response type, or should we define it in the library for convenience?
         
