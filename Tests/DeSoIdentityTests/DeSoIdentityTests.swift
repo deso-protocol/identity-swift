@@ -6,6 +6,7 @@
         var authWorker: MockAuthWorker!
         var keyStore: MockKeyStore!
         var transactionSigner: MockTransactionSigner!
+        var transacionSubmitter: MockTransactionSubmitter!
         var messageDecrypter: MockMessageDecrypter!
         var jwtCreator: MockJWTCreator!
         var context: MockPresentationContextProvider!
@@ -14,6 +15,7 @@
             authWorker = MockAuthWorker()
             keyStore = MockKeyStore()
             transactionSigner = MockTransactionSigner()
+            transacionSubmitter = MockTransactionSubmitter()
             messageDecrypter = MockMessageDecrypter()
             jwtCreator = MockJWTCreator()
             context = MockPresentationContextProvider()
@@ -22,6 +24,7 @@
                 authWorker: authWorker,
                 keyStore: keyStore,
                 transactionSigner: transactionSigner,
+                transactionSubmitter: transacionSubmitter,
                 messageDecrypter: messageDecrypter,
                 jwtWorker: jwtCreator,
                 context: context,

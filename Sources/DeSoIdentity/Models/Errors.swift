@@ -14,6 +14,7 @@ public enum IdentityError: Swift.Error {
     case keyInfoExpired
     case missingSharedSecret
     case signatureNotAString
+    case nodeNotSpecified
 }
 
 enum CryptoError: Swift.Error {

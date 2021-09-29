@@ -22,8 +22,8 @@ public class Identity {
      The possible responses when attempting to sign a transaction
      */
     public enum TransactionResponse {
-        case success(statusCode: Int, response: Data)
-        case failed(statusCode: Int, error: Error)
+        case success(data: Data?)
+        case failed(error: Error)
     }
     
     /**
@@ -35,10 +35,11 @@ public class Identity {
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
     private let transactionSigner: TransactionSignable
+    private let transactionSubmitter: TransactionSubmittable
     private let messageDecrypter: MessageDecryptable
     private let jwtWorker: JWTFetchable
     private let context: PresentationContextProvidable
-    private let nodeBaseURL: String
+    private let nodeBaseURL: URL?
     private let network: Network
     private let overrideIdentityURL: String?
     
@@ -65,6 +66,7 @@ public class Identity {
             authWorker: AuthWorker(),
             keyStore: keyStore,
             transactionSigner: SignTransactionWorker(),
+            transactionSubmitter: SubmitTransactionWorker(),
             messageDecrypter: MessageDecryptionWorker(),
             jwtWorker: JWTWorker(),
             context: context,
@@ -78,6 +80,7 @@ public class Identity {
         authWorker: Authable,
         keyStore: KeyInfoStorable,
         transactionSigner: TransactionSignable,
+        transactionSubmitter: TransactionSubmittable,
         messageDecrypter: MessageDecryptable,
         jwtWorker: JWTFetchable,
         context: PresentationContextProvidable,
@@ -88,10 +91,11 @@ public class Identity {
         self.authWorker = authWorker
         self.keyStore = keyStore
         self.transactionSigner = transactionSigner
+        self.transactionSubmitter = transactionSubmitter
         self.messageDecrypter = messageDecrypter
         self.jwtWorker = jwtWorker
         self.context = context
-        self.nodeBaseURL = nodeBaseURL
+        self.nodeBaseURL = URL(string: nodeBaseURL)
         self.network = network
         self.overrideIdentityURL = overrideIdentityURL
         
@@ -148,25 +152,26 @@ public class Identity {
      Sign a transaction and immediately submit it.
      NOTE: This requires the target node to conform to the same API spec as the core bitclout node.
      Specifically, it requires the `/submit-transaction` endpoint as detailed here: https://docs.bitclout.com/devs/backend-api#submit-transaction
-     - Parameter T: a `Decodable` type to expect back in the `/submit-transaction` response
      - Parameter transaction: an `UnsignedTransaction` object to be signed
      - Parameter completion: a `TransactionCompletion` block that will be called upon completion of the sign/submission process
      */
-    public func signAndSubmit(_ transaction: UnsignedTransaction, completion: TransactionCompletion?) throws {
-        // TODO: sign transaction, handle possible unauthorized key error, then submit the signed transaction and return the expected response body
-        // QUESTION: Is it appropriate to require the client to define the response type, or should we define it in the library for convenience?
+    public func signAndSubmit(_ transaction: UnsignedTransaction, completion: @escaping TransactionCompletion) throws {
+        guard let nodeURL = nodeBaseURL else {
+            throw IdentityError.nodeNotSpecified
+        }
         
-        /**
-         Probable flow here:
-         - Check if derived key is stored for public key in transaction
-         - If not, throw error, client should ask for login
-         - If so, sign transaction with it, then call `/submit-transaction`
-         - If success, great, return to client
-         - If failure, check reason
-             - If derived key expired, present webview and retyr upon retrieving new derived key
-             - If derived key not authorised, silently create and submit new authorise transaction, then retry
-             - Any other error, return to client
-         */
+        let signedHex = try transactionSigner.signTransaction(transaction)
+        try transactionSubmitter.submitTransaction(with: signedHex, on: nodeURL) { response in
+            switch response {
+            case .success(let data):
+                completion(.success(data: data))
+            case .derivedKeyExpired:
+                // TODO: get new derived key here and retry
+                break
+            case .failed(let error):
+                completion(.failed(error: error))
+            }
+        }
     }
 
     /**
