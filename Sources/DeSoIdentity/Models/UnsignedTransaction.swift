@@ -8,6 +8,6 @@
 import Foundation
 
 public struct UnsignedTransaction: Equatable {
-    let publicKey: String
-    let transactionHex: String
+    public let publicKey: String
+    public let transactionHex: String
 }
