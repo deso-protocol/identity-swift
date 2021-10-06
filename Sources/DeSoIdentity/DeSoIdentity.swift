@@ -207,6 +207,23 @@ public class Identity {
     public func jwt(for publicKey: String) throws -> String {
         return try jwtWorker.getJWT(for: publicKey)
     }
+    
+    /**
+     Retrieve the derived public key stored fro a given public key.
+     This should be added to the `DerivedPublicKey` field in the extra data for any transaction to be signed using the library
+     - Parameter publicKey: The true public key for which to retrieve the derived public key
+     - Returns: The currently stored derived public key corresponding to the supplied true public key
+     - Throws: Error if derived key info is not stored for the specified public key
+     */
+    public func derivedPublicKey(for publicKey: String) throws -> String {
+        guard let info = try keyStore.getDerivedKeyInfo(for: publicKey) else {
+            throw IdentityError.missingInfoForPublicKey
+        }
+
+        // TODO: Possible improvement - can we check the current block height and throw an error here if the derived key has already expired?
+        
+        return info.derivedPublicKey
+    }
 }
 
 
