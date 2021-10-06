@@ -24,7 +24,7 @@ class AuthWorker: Authable {
         if let overrideUrl = overrideUrl {
             url = overrideUrl
         } else {
-            let baseUrl = "https://identity.bitclout.com"
+            let baseUrl = "https://identity.deso.org"
             url = baseUrl + "/derive"
         }
         let callbackScheme = (Bundle.main.bundleIdentifier ?? UUID().uuidString) + ".identity"
