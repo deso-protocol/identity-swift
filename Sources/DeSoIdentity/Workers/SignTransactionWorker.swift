@@ -20,7 +20,7 @@ protocol TransactionSignable {
 
 struct AppendExtraDataBody: Codable {
     let transactionHex: String
-    let extraData: [String: String]
+    let extraData: [String: [UInt8]]
     
     enum CodingKeys: String, CodingKey {
         case transactionHex = "TransactionHex"
@@ -52,14 +52,11 @@ class SignTransactionWorker: TransactionSignable {
         }
         
         let decoded = try Base58CheckDecodePrefix(input: key.derivedPublicKey, prefixLen: 3)
-        guard let derivedKeyByteString = String(bytes: decoded.result, encoding: .ascii) else {
-            throw CryptoError.badPublicKey
-        }
-        
+
         let url = URL(string: "/api/v0/append-extra-data", relativeTo: nodeURL)!
         
         let body = AppendExtraDataBody(transactionHex: transaction.transactionHex,
-                                       extraData: ["DerivedPublicKey": derivedKeyByteString])
+                                       extraData: ["DerivedPublicKey": decoded.result])
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
