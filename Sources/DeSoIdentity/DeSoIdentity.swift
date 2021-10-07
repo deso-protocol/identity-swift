@@ -19,7 +19,7 @@ public class Identity {
     public typealias LoginCompletion = ((_ response: LoginResponse) -> Void)
     
     /**
-     The possible responses when attempting to sign a transaction
+     The possible responses when attempting to sign and submit a transaction
      */
     public enum TransactionResponse {
         case success(data: Data?)
@@ -27,10 +27,24 @@ public class Identity {
     }
     
     /**
+     The possible responses when attempting to sign a transaction
+     */
+    public enum SignatureResponse {
+        case success(signature: String)
+        case failed(error: Error)
+    }
+    
+    /**
      Completion handler called upon successful submission of a signed transaction
-     - Parameter response: The response of the transaction signing request
+     - Parameter response: The response of the transaction submission request
      */
     public typealias TransactionCompletion = ((_ response: TransactionResponse) -> Void)
+    
+    /**
+     Completion handler called upon successfully signing a transaction
+     - Parameter response: The response of the transaction signing request
+     */
+    public typealias SignatureCompletion = ((_ response: SignatureResponse) -> Void)
     
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
@@ -144,8 +158,20 @@ public class Identity {
      - Parameter transaction: an `UnsignedTransaction` object to be signed
      - Returns: A signed hash of the transaction
      */
-    public func sign(_ transaction: UnsignedTransaction) throws -> String {
-        return try transactionSigner.signTransaction(transaction)
+    public func sign(_ transaction: UnsignedTransaction, completion: @escaping SignatureCompletion) throws {
+        guard let nodeURL = nodeBaseURL else {
+            throw IdentityError.nodeNotSpecified
+        }
+        
+        try transactionSigner.signTransaction(transaction, on: nodeURL) { response in
+            switch response {
+            case .success(let signature):
+                completion(.success(signature: signature))
+            case .failed(let error):
+                completion(.failed(error: error))
+            }
+            
+        }
     }
     
     /**
@@ -160,14 +186,24 @@ public class Identity {
             throw IdentityError.nodeNotSpecified
         }
         
-        let signedHex = try transactionSigner.signTransaction(transaction)
-        try transactionSubmitter.submitTransaction(with: signedHex, on: nodeURL) { response in
+        try transactionSigner.signTransaction(transaction, on: nodeURL) { response in
             switch response {
-            case .success(let data):
-                completion(.success(data: data))
-            case .derivedKeyExpired:
-                // TODO: get new derived key here and retry
-                break
+            case .success(let signature):
+                do {
+                    try self.transactionSubmitter.submitTransaction(with: signature, on: nodeURL) { response in
+                        switch response {
+                        case .success(let data):
+                            completion(.success(data: data))
+                        case .derivedKeyExpired:
+                            // TODO: get new derived key here and retry
+                            break
+                        case .failed(let error):
+                            completion(.failed(error: error))
+                        }
+                    }
+                } catch {
+                    completion(.failed(error: error))
+                }
             case .failed(let error):
                 completion(.failed(error: error))
             }

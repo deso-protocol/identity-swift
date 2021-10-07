@@ -62,9 +62,14 @@
         func testSignCallsTransactionSigner() {
             let transaction = UnsignedTransaction(publicKey: "qwerty",
                                                   transactionHex: "123456")
-            let _ = try! sut.sign(transaction)
+            let expectation = self.expectation(description: "completion")
+            try! sut.sign(transaction) { _ in
+                expectation.fulfill()
+            }
+            waitForExpectations(timeout: 15, handler: nil)
             XCTAssertTrue(transactionSigner.calledSignTransaction)
             XCTAssertEqual(transactionSigner.transactionRequestedForSign, transaction)
+            XCTAssertEqual(transactionSigner.specifiedNodeURL, URL(string: "foo://bar")!)
         }
         
         func testDecryptThreadsCallsMessageDecrypter() {

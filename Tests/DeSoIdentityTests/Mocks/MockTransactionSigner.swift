@@ -9,15 +9,19 @@ import Foundation
 @testable import DeSoIdentity
 
 class MockTransactionSigner: TransactionSignable {
+    
     var mockSignedHex: String = "foobarbat"
     
     var calledSignTransaction: Bool = false
+    var specifiedNodeURL: URL?
     var transactionRequestedForSign: UnsignedTransaction?
-    func signTransaction(_ transaction: UnsignedTransaction) throws -> String {
+    func signTransaction(_ transaction: UnsignedTransaction,
+                         on nodeURL: URL,
+                         completion: @escaping (SignTransactionResponse) -> Void) throws {
         calledSignTransaction = true
+        specifiedNodeURL = nodeURL
         transactionRequestedForSign = transaction
-        return mockSignedHex
+        completion(.success(mockSignedHex))
     }
-    
     
 }

@@ -7,8 +7,33 @@
 
 import Foundation
 
+enum SignTransactionResponse {
+    case success(_ signedHash: String)
+    case failed(_ error: Error)
+}
+
 protocol TransactionSignable {
-    func signTransaction(_ transaction: UnsignedTransaction) throws -> String
+    func signTransaction(_ transaction: UnsignedTransaction,
+                         on nodeURL: URL,
+                         completion: @escaping (SignTransactionResponse) -> Void) throws
+}
+
+struct AppendExtraDataBody: Codable {
+    let transactionHex: String
+    let extraData: [String: String]
+    
+    enum CodingKeys: String, CodingKey {
+        case transactionHex = "TransactionHex"
+        case extraData = "ExtraData"
+    }
+}
+
+struct AppendExtraDataResponse: Codable {
+    let transactionHex: String
+    
+    enum CodingKeys: String, CodingKey {
+        case transactionHex = "TransactionHex"
+    }
 }
 
 class SignTransactionWorker: TransactionSignable {
@@ -19,11 +44,39 @@ class SignTransactionWorker: TransactionSignable {
         self.keyStore = keyStore
     }
     
-    func signTransaction(_ transaction: UnsignedTransaction) throws -> String {
+    func signTransaction(_ transaction: UnsignedTransaction,
+                         on nodeURL: URL,
+                         completion: @escaping (SignTransactionResponse) -> Void) throws {
         guard let key = try keyStore.getDerivedKeyInfo(for: transaction.publicKey) else {
             throw IdentityError.missingInfoForPublicKey
         }
         
-        return try DeSoIdentity.signTransaction(seedHex: key.derivedSeedHex, transactionHex: transaction.transactionHex)
+        
+        let url = URL(string: "/api/v0/append-extra-data", relativeTo: nodeURL)!
+        
+        let body = AppendExtraDataBody(transactionHex: transaction.transactionHex,
+                                       extraData: ["DerivedPublicKey": key.derivedPublicKey])
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = try JSONEncoder().encode(body)
+        
+        URLSession
+            .shared
+            .dataTask(with: request, completionHandler: { data, response, error in
+                if let error = error {
+                    // TODO: Check for expired derived key error here and send back appropriate response
+                    completion(.failed(error))
+                } else if let data = data,
+                          let responseBody = try? JSONDecoder().decode(AppendExtraDataResponse.self, from: data) {
+                    do {
+                        let signed = try DeSoIdentity.signTransaction(seedHex: key.derivedSeedHex, transactionHex: responseBody.transactionHex)
+                        completion(.success(signed))
+                    } catch {
+                        completion(.failed(error))
+                    }
+                }
+            })
+            .resume()
     }
 }
