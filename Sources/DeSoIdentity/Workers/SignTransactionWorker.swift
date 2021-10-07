@@ -51,11 +51,15 @@ class SignTransactionWorker: TransactionSignable {
             throw IdentityError.missingInfoForPublicKey
         }
         
+        let decoded = try Base58CheckDecodePrefix(input: key.derivedPublicKey, prefixLen: 3)
+        guard let derivedKeyByteString = String(bytes: decoded.result, encoding: .utf8) else {
+            throw CryptoError.badPublicKey
+        }
         
         let url = URL(string: "/api/v0/append-extra-data", relativeTo: nodeURL)!
         
         let body = AppendExtraDataBody(transactionHex: transaction.transactionHex,
-                                       extraData: ["DerivedPublicKey": key.derivedPublicKey])
+                                       extraData: ["DerivedPublicKey": derivedKeyByteString])
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
