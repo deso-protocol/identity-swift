@@ -52,7 +52,7 @@ class SignTransactionWorker: TransactionSignable {
         }
         
         let decoded = try Base58CheckDecodePrefix(input: key.derivedPublicKey, prefixLen: 3)
-        guard let derivedKeyByteString = String(bytes: decoded.result, encoding: .utf8) else {
+        guard let derivedKeyByteString = String(bytes: decoded.result, encoding: .unicode) else {
             throw CryptoError.badPublicKey
         }
         
