@@ -38,6 +38,7 @@ class SubmitTransactionWorker: TransactionSubmittable {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = try JSONEncoder().encode(body)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         URLSession
             .shared
