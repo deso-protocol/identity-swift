@@ -6,8 +6,8 @@ import AuthenticationServices
 public class Identity {
     
     public struct LoginResponse {
-        let selectedPublicKey: String
-        let allLoadedPublicKeys: [String]
+        public let selectedPublicKey: String
+        public let allLoadedPublicKeys: [String]
     }
     public typealias LoginCompletion = ((Result<LoginResponse, Error>) -> Void)
 
