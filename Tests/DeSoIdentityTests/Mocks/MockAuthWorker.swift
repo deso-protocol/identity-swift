@@ -21,6 +21,6 @@ class MockAuthWorker: Authable {
         contextProvided = context
         networkRequested = network
         overrideUrlSet = overrideUrl
-        completion(.success(selectedPublicKey: "foo", allLoadedPublicKeys: ["bar", "bat"]))
+        completion(.success(Identity.LoginResponse(selectedPublicKey: "foo", allLoadedPublicKeys: ["bar", "bat"])))
     }
 }

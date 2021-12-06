@@ -53,10 +53,10 @@ class AuthWorker: Authable {
             do {
                 try self.keyStore.store(keyData)
                 let allKeys = try self.keyStore.getAllStoredKeys()
-                completion(.success(selectedPublicKey: keyData.publicKey, allLoadedPublicKeys: allKeys))
+                completion(.success(Identity.LoginResponse(selectedPublicKey: keyData.publicKey, allLoadedPublicKeys: allKeys)))
             } catch {
                 print(error.localizedDescription)
-                completion(.failed(error: error))
+                completion(.failure(error))
             }
         }
         session.presentationContextProvider = context

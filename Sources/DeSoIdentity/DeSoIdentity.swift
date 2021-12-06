@@ -4,47 +4,18 @@ import AuthenticationServices
  The main entry point for the library
  */
 public class Identity {
-    /**
-     The possible responses when login is called
-     */
-    public enum LoginResponse {
-        case success(selectedPublicKey: String, allLoadedPublicKeys: [String])
-        case failed(error: Error)
+    
+    public struct LoginResponse {
+        let selectedPublicKey: String
+        let allLoadedPublicKeys: [String]
     }
+    public typealias LoginCompletion = ((Result<LoginResponse, Error>) -> Void)
+
+    public typealias TransactionResponse = Data?
+    public typealias TransactionCompletion = ((Result<TransactionResponse, Error>) -> Void)
     
-    /**
-     Completion handler called upon successful login.
-     - Parameter response: the response of the login request
-     */
-    public typealias LoginCompletion = ((_ response: LoginResponse) -> Void)
-    
-    /**
-     The possible responses when attempting to sign and submit a transaction
-     */
-    public enum TransactionResponse {
-        case success(data: Data?)
-        case failed(error: Error)
-    }
-    
-    /**
-     The possible responses when attempting to sign a transaction
-     */
-    public enum SignatureResponse {
-        case success(signature: String)
-        case failed(error: Error)
-    }
-    
-    /**
-     Completion handler called upon successful submission of a signed transaction
-     - Parameter response: The response of the transaction submission request
-     */
-    public typealias TransactionCompletion = ((_ response: TransactionResponse) -> Void)
-    
-    /**
-     Completion handler called upon successfully signing a transaction
-     - Parameter response: The response of the transaction signing request
-     */
-    public typealias SignatureCompletion = ((_ response: SignatureResponse) -> Void)
+    public typealias SignatureResponse = String
+    public typealias SignatureCompletion = ((Result<SignatureResponse, Error>) -> Void)
     
     private let authWorker: Authable
     private var keyStore: KeyInfoStorable
@@ -121,7 +92,7 @@ public class Identity {
      Call this to log in to one or more accounts.
      - Parameter completion: Will be called on completion of the login flow
      */
-    public func login(_ completion: @escaping LoginCompletion ) {
+    public func login(_ completion: @escaping LoginCompletion) {
         authWorker.presentAuthSession(context: context, on: self.network, overrideUrl: overrideIdentityURL, with: completion)
     }
 
@@ -166,9 +137,9 @@ public class Identity {
         try transactionSigner.signTransaction(transaction, on: nodeURL) { response in
             switch response {
             case .success(let signature):
-                completion(.success(signature: signature))
+                completion(.success(signature))
             case .failed(let error):
-                completion(.failed(error: error))
+                completion(.failure(error))
             }
             
         }
@@ -193,19 +164,19 @@ public class Identity {
                     try self.transactionSubmitter.submitTransaction(with: signature, on: nodeURL) { response in
                         switch response {
                         case .success(let data):
-                            completion(.success(data: data))
+                            completion(.success(data))
                         case .derivedKeyExpired:
                             // TODO: get new derived key here and retry
                             break
                         case .failed(let error):
-                            completion(.failed(error: error))
+                            completion(.failure(error))
                         }
                     }
                 } catch {
-                    completion(.failed(error: error))
+                    completion(.failure(error))
                 }
             case .failed(let error):
-                completion(.failed(error: error))
+                completion(.failure(error))
             }
         }
     }
