@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum IdentityError: Swift.Error {
+public enum IdentityError: LocalizedError {
     case missingPresentationAnchor
     case notLoggedIn
     case missingInfoForPublicKey
@@ -15,9 +15,10 @@ public enum IdentityError: Swift.Error {
     case missingSharedSecret
     case signatureNotAString
     case nodeNotSpecified
+    case derivedKeyExpired
 }
 
-enum CryptoError: Swift.Error {
+enum CryptoError: LocalizedError {
     case badPrivateKey
     case badPublicKey
     case badSignature

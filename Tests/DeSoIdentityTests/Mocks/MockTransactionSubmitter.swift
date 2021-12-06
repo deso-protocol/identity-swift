@@ -11,7 +11,7 @@ import Foundation
 class MockTransactionSubmitter: TransactionSubmittable {
     var calledSubmitTransaction: Bool = false
     var setNodeURL: URL?
-    func submitTransaction(with signedHex: String, on nodeURL: URL, completion: @escaping ((SubmitTransactionResponse) -> Void)) throws {
+    func submitTransaction(with signedHex: String, on nodeURL: URL, completion: @escaping ((Result<SubmitTransactionResponse, Error>) -> Void)) throws {
         calledSubmitTransaction = true
         completion(.success(nil))
     }

@@ -50,6 +50,14 @@ class AuthWorker: Authable {
                 print("Unexpected data returned")
                 return
             }
+            
+            // Construct a AuthorizeDerivedKey transaction via Backend API through /api/v0/authorize-derived-key
+            
+            // Sign the AuthorizeDerivedKey transaction with the derived key
+            
+            // Submit signed AuthorizeDerivedKey transaction via /api/v0/submit-transaction
+            
+            
             do {
                 try self.keyStore.store(keyData)
                 let allKeys = try self.keyStore.getAllStoredKeys()

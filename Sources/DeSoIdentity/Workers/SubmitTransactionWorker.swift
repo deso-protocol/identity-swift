@@ -7,16 +7,12 @@
 
 import Foundation
 
-enum SubmitTransactionResponse {
-    case success(_ data: Data?)
-    case derivedKeyExpired
-    case failed(_ error: Error)
-}
+typealias SubmitTransactionResponse = Data?
 
 protocol TransactionSubmittable {
     func submitTransaction(with signedHex: String,
                            on nodeURL: URL,
-                           completion: @escaping ((SubmitTransactionResponse) -> Void)) throws
+                           completion: @escaping ((Result<SubmitTransactionResponse, Error>) -> Void)) throws
 }
 
 struct SubmitTransactionBody: Codable {
@@ -30,7 +26,7 @@ struct SubmitTransactionBody: Codable {
 class SubmitTransactionWorker: TransactionSubmittable {
     func submitTransaction(with signedHex: String,
                            on nodeURL: URL,
-                           completion: @escaping ((SubmitTransactionResponse) -> Void)) throws {
+                           completion: @escaping ((Result<SubmitTransactionResponse, Error>) -> Void)) throws {
         let url = URL(string: "/api/v0/submit-transaction", relativeTo: nodeURL)!
         
         let body = SubmitTransactionBody(transactionHex: signedHex)
@@ -45,7 +41,7 @@ class SubmitTransactionWorker: TransactionSubmittable {
             .dataTask(with: request, completionHandler: { data, response, error in
                 if let error = error {
                     // TODO: Check for expired derived key error here and send back appropriate response
-                    completion(.failed(error))
+                    completion(.failure(error))
                 } else {
                     completion(.success(data))
                 }

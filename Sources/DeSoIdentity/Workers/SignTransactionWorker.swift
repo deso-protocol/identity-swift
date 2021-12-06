@@ -7,15 +7,12 @@
 
 import Foundation
 
-enum SignTransactionResponse {
-    case success(_ signedHash: String)
-    case failed(_ error: Error)
-}
+typealias SignTransactionResponse = String
 
 protocol TransactionSignable {
     func signTransaction(_ transaction: UnsignedTransaction,
                          on nodeURL: URL,
-                         completion: @escaping (SignTransactionResponse) -> Void) throws
+                         completion: @escaping ((Result<SignTransactionResponse, Error>) -> Void)) throws
 }
 
 struct AppendExtraDataBody: Codable {
@@ -46,7 +43,7 @@ class SignTransactionWorker: TransactionSignable {
     
     func signTransaction(_ transaction: UnsignedTransaction,
                          on nodeURL: URL,
-                         completion: @escaping (SignTransactionResponse) -> Void) throws {
+                         completion: @escaping ((Result<SignTransactionResponse, Error>) -> Void)) throws {
         guard let key = try keyStore.getDerivedKeyInfo(for: transaction.publicKey) else {
             throw IdentityError.missingInfoForPublicKey
         }
@@ -66,14 +63,14 @@ class SignTransactionWorker: TransactionSignable {
             .dataTask(with: request, completionHandler: { data, response, error in
                 if let error = error {
                     // TODO: Check for expired derived key error here and send back appropriate response
-                    completion(.failed(error))
+                    completion(.failure(error))
                 } else if let data = data,
                           let responseBody = try? JSONDecoder().decode(AppendExtraDataResponse.self, from: data) {
                     do {
                         let signed = try DeSoIdentity.signTransaction(seedHex: key.derivedSeedHex, transactionHex: responseBody.transactionHex)
                         completion(.success(signed))
                     } catch {
-                        completion(.failed(error))
+                        completion(.failure(error))
                     }
                 }
             })

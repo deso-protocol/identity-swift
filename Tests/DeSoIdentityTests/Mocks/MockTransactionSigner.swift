@@ -17,7 +17,7 @@ class MockTransactionSigner: TransactionSignable {
     var transactionRequestedForSign: UnsignedTransaction?
     func signTransaction(_ transaction: UnsignedTransaction,
                          on nodeURL: URL,
-                         completion: @escaping (SignTransactionResponse) -> Void) throws {
+                         completion: @escaping ((Result<SignTransactionResponse, Error>) -> Void)) throws {
         calledSignTransaction = true
         specifiedNodeURL = nodeURL
         transactionRequestedForSign = transaction

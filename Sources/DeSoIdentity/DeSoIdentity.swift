@@ -138,7 +138,7 @@ public class Identity {
             switch response {
             case .success(let signature):
                 completion(.success(signature))
-            case .failed(let error):
+            case .failure(let error):
                 completion(.failure(error))
             }
             
@@ -165,17 +165,15 @@ public class Identity {
                         switch response {
                         case .success(let data):
                             completion(.success(data))
-                        case .derivedKeyExpired:
+                        case .failure(let error):
                             // TODO: get new derived key here and retry
-                            break
-                        case .failed(let error):
                             completion(.failure(error))
                         }
                     }
                 } catch {
                     completion(.failure(error))
                 }
-            case .failed(let error):
+            case .failure(let error):
                 completion(.failure(error))
             }
         }
