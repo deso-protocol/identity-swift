@@ -186,16 +186,3 @@ public struct DeSoIdentity {
     
 }
 
-public struct DeSoLoginResponse {
-    
-    public enum LoginState {
-        case authorized
-        case notAuthorized
-        case expiredAuthorization
-        case insufficentBalanceForAuthorization
-    }
-    
-    public let selectedPublicKey: String
-    public let allLoadedPublicKeys: [String]
-    public let loginState: LoginState
-}
