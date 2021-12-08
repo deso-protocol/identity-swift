@@ -1,6 +1,6 @@
 //
 //  DerivedKeyInfo.swift
-//  
+//
 //
 //  Created by Andy Boyd on 30/06/2021.
 //
@@ -17,7 +17,7 @@ public struct DerivedKeyInfo: Codable, Equatable {
     public let derivedPublicKey: String
     public let derivedSeedHex: String
     public let btcDepositAddress: String
-    public let expirationBlock: Int
+    public let expirationBlock: UInt64
     public let accessSignature: String
     public let network: Network
     public let jwt: String
@@ -26,7 +26,6 @@ public struct DerivedKeyInfo: Codable, Equatable {
 
 extension DerivedKeyInfo {
     init?(_ query: [URLQueryItem]) {
-        // TODO: Confirm with Identity web app if this matches how the data will be returned from the auth session
         guard let truePubKey = query.first(where: { $0.name == "publicKey" })?.value,
               let newPubKey = query.first(where: { $0.name == "derivedPublicKey" })?.value,
               let newPrivateKey = query.first(where: { $0.name == "derivedSeedHex" })?.value,
@@ -34,7 +33,7 @@ extension DerivedKeyInfo {
               let btcDepositAddress = query.first(where: { $0.name == "btcDepositAddress" })?.value,
               let network = Network(rawValue: query.first(where: { $0.name == "network" })?.value ?? ""),
               let expirationBlockValue = query.first(where: { $0.name == "expirationBlock" })?.value,
-              let expirationBlock = Int(expirationBlockValue),
+              let expirationBlock = UInt64(expirationBlockValue),
               let jwt = query.first(where: { $0.name == "jwt" })?.value,
               let derivedJwt = query.first(where: { $0.name == "derivedJwt" })?.value else {
             return nil

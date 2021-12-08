@@ -1,6 +1,6 @@
 //
 //  ECIES.swift
-//  
+//
 //
 //  Created by Andy Boyd on 06/07/2021.
 //
@@ -230,3 +230,4 @@ func signTransaction(seedHex: String, transactionHex: String) throws -> String {
     let signedTransactionBytes: [UInt8] = slicedTransactionBytes + signatureLength + signatureBytes
     return signedTransactionBytes.toHexString()
 }
+
