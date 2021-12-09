@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/leif-ibsen/BigInt",
         "state": {
           "branch": null,
-          "revision": "56a12cb278293d8e6bec91df6a1e5265e294d6ce",
-          "version": "1.2.5"
+          "revision": "69877bd2005ee85b0c3d5b330d1794dc0ee4c869",
+          "version": "1.2.9"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "4e31051c63cc0ddf10a25cf5318856c510cf77f4",
-          "version": "1.4.0"
+          "revision": "4b0565384d3c4c588af09e660535b2c7c9bf5b39",
+          "version": "1.4.2"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/leif-ibsen/SwiftECC",
         "state": {
           "branch": null,
-          "revision": "621c70126966e5c289c4dc0ff801c6282b6baa05",
-          "version": "1.0.2"
+          "revision": "048e68db4115eb062a3d792f17bb83a2ff118be2",
+          "version": "1.1.0"
         }
       }
     ]
