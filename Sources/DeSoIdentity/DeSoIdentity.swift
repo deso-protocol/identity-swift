@@ -199,6 +199,7 @@ public struct DeSoIdentity {
     /// - Throws: ``DeSoIdentityError``
     public static func decryptThreads(_ encryptedMessageThreads: [EncryptedMessagesThread], forPublicKey: String, shouldThrow: Bool) async throws -> [String: [String]] {
         
+        
         if encryptedMessageThreads.first(where: { $0.publicKey != forPublicKey }) != nil {
             throw DeSoIdentityError.error(message: "PublicKey mismatch")
         }

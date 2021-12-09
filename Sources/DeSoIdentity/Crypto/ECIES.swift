@@ -66,7 +66,7 @@ func aesCtrDecryptLegacy(iv: [UInt8], key: [UInt8], data: [UInt8]) throws -> [UI
 }
 
 func hmacSha256Sign(key: [UInt8], msg: [UInt8]) throws -> [UInt8] {
-    return try HMAC(key: key, variant: .sha256).authenticate(msg)
+    return try HMAC(key: key, variant: .sha2(.sha256)).authenticate(msg)
 }
 
 /**
@@ -75,7 +75,7 @@ func hmacSha256Sign(key: [UInt8], msg: [UInt8]) throws -> [UInt8] {
 func getPublicKey(from privateKey: [UInt8]) throws -> [UInt8] {
     guard privateKey.count == 32 else { throw CryptoError.badPrivateKey }
     let privKey = try ECPrivateKey(domain: ec, s: BInt(magnitude: privateKey))
-    let pubKey = ec.multiply(ec.g, privKey.s)
+    let pubKey = try ec.multiplyPoint(ec.g, privKey.s)
     return try ec.encodePoint(pubKey)
 }
 
@@ -111,7 +111,7 @@ func deriveX(privateKeyA: [UInt8], publicKeyB: [UInt8]) throws -> [UInt8] {
     let keyA = BInt(magnitude: privateKeyA)
     let keyB = try ec.decodePoint(publicKeyB)
     
-    let derived = ec.multiply(keyB, keyA).x
+    let derived = try ec.multiplyPoint(keyB, keyA).x
     return derived.asMagnitudeBytes()
 }
 
