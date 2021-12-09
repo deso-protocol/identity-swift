@@ -135,8 +135,7 @@ internal extension DeSoIdentity {
     
     static func decrypt(messages: [EncryptedMessagesThread.EncryptedText], with secret: SharedSecret) throws -> [String] {
         return try messages.compactMap {
-            return try decryptShared(sharedPx: Data(hex: secret.secret).bytes,
-                                     encrypted: Data(hex: $0.message).bytes, legacy: !$0.v2).stringValue
+            return try decryptWith(sharedSecret: secret.secret, encryptedText: $0.message, v2: $0.v2).stringValue
         }
     }
     

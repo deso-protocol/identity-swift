@@ -211,7 +211,9 @@ public struct DeSoIdentity {
             do {
                 res[this.otherPublicKey] = try decryptThread(this, shouldThrow: shouldThrow)
             } catch {
-                throw error
+                if shouldThrow {
+                    throw error
+                }
             }
         })
         

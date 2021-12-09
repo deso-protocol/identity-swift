@@ -143,29 +143,35 @@ func encrypt(publicKeyTo: [UInt8], msg: [UInt8], ephemPrivateKey: [UInt8]? = nil
 /**
  Decrypt serialised AES-128-CTR
  */
-func decrypt(privateKey: [UInt8], encrypted: [UInt8], legacy: Bool = false) throws -> [UInt8] {
+func decryptWith(sharedSecret: String, encryptedText: String, v2: Bool) throws -> [UInt8] {
+    let sharedPrivateKey = Data(hex: sharedSecret).bytes
+    let encrypted = Data(hex: encryptedText).bytes
+    
     let metaLength = 1 + 64 + 16 + 32
     guard encrypted.count > metaLength, encrypted[0] >= 2, encrypted[0] <= 4 else { throw CryptoError.invalidCipherText }
     
     // deserialize
-    let ephemPublicKey = encrypted.slice(from: 0, to: 65)
+    let ephemPublicKey = Array(encrypted[0..<65])
     let cipherTextLength = encrypted.count - metaLength
-    let iv = encrypted.slice(from: 65, to: 65 + 16)
-    let cipherAndIv = encrypted.slice(from: 65, to: 65 + 16 + cipherTextLength)
-    let cipherText = cipherAndIv.slice(from: 16)
-    let msgMac = encrypted.slice(from: 65 + 16 + cipherTextLength)
+    let iv =   Array(encrypted[65..<65+16])
+    let cipherAndIv = Array(encrypted[65..<65+16+cipherTextLength])
+    let cipherText = Array(cipherAndIv.suffix(from: 16))
+    let msgMac = Array(encrypted.suffix(from: 65 + 16 + cipherTextLength))
     
     // check HMAC
-    let px = try deriveX(privateKeyA: privateKey, publicKeyB: ephemPublicKey)
+    let px = try deriveX(privateKeyA: sharedPrivateKey, publicKeyB: ephemPublicKey)
     let hash = kdf(secret: px, outputLength: 32)
-    let encryptionKey = hash.slice(from: 0, to: 16)
-    let macKey = Hash.sha256(hash.slice(from: 16))
-    guard try hmacSha256Sign(key: macKey, msg: cipherAndIv) == msgMac else { throw CryptoError.incorrectMAC }
+    let encryptionKey = Array(hash[0..<16])
+    let macKey = Hash.sha256(Array(hash.suffix(from: 16)))
+    let dataToMac = cipherAndIv
+
+    guard try hmacSha256Sign(key: macKey, msg: dataToMac) == msgMac else { throw CryptoError.incorrectMAC }
     
-    return try legacy ?
-        aesCtrDecryptLegacy(iv: iv, key: encryptionKey, data: cipherText) :
-        aesCtrDecrypt(iv: iv, key: encryptionKey, data: cipherText)
+    return try v2 ?
+        aesCtrDecrypt(iv: iv, key: encryptionKey, data: cipherText) :
+        aesCtrDecryptLegacy(iv: iv, key: encryptionKey, data: cipherText)
 }
+
 
 /**
  Encrypt AES-128-CTR and serialise as in Parity
@@ -195,24 +201,6 @@ func encryptShared(sharedPx: [UInt8],
 }
 
 /**
- Decrypt serialised AES-128-CTR
- Using ECDH shared secret KDF
- */
-func decryptShared(privateKeyRecipient: [UInt8], publicKeySender: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
-    let sharedPx = try deriveX(privateKeyA: privateKeyRecipient, publicKeyB: publicKeySender)
-    let sharedPxString = sharedPx.reduce(into: "") { res, cur in
-        res.append("\(cur),")
-    }
-    print(sharedPxString)
-    return try decryptShared(sharedPx: sharedPx, encrypted: encrypted)
-}
-
-func decryptShared(sharedPx: [UInt8], encrypted: [UInt8], legacy: Bool = false) throws -> [UInt8] {
-    let sharedPrivateKey = kdf(secret: sharedPx, outputLength: 32)
-    return try decrypt(privateKey: sharedPrivateKey, encrypted: encrypted, legacy: legacy)
-}
-
-/**
  Sign a Transaction Hex for submission
  */
 func signTransaction(seedHex: String, transactionHex: String) throws -> String {
@@ -230,4 +218,3 @@ func signTransaction(seedHex: String, transactionHex: String) throws -> String {
     let signedTransactionBytes: [UInt8] = slicedTransactionBytes + signatureLength + signatureBytes
     return signedTransactionBytes.toHexString()
 }
-
