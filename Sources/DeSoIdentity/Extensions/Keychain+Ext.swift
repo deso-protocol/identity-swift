@@ -13,20 +13,6 @@ enum StorableKeys: String {
     case sharedSecrets
 }
 
-//protocol KeyInfoStorable {
-//    var keychain: DataStorable { get set }
-////    mutating func store(_ info: DerivedKeyInfo) throws
-////    mutating func store(sharedSecret: SharedSecret) throws
-//    mutating func clearAllStoredInfo() throws
-////    mutating func clearDerivedKeyInfo(for publicKey: String) throws
-////    mutating func clearAllSharedSecrets(for privateKey: String) throws
-////    mutating func clearSharedSecret(for privateKey: String, and publicKey: String) throws
-//    func getDerivedKeyInfo(for publicKey: String) throws -> DerivedKeyInfo
-////    func getAllStoredKeys() throws -> [String]
-////    func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret?
-////    func getAllSharedSecrets() throws -> [SharedSecret]
-//}
-
 protocol DataStorable {
     func getData(_ key: String) throws -> Data?
     mutating func set(_ value: Data, key: String) throws
@@ -131,5 +117,68 @@ extension DataStorable {
             return decodedData
         }
         return [String: Data]()
+    }
+
+    mutating func store(_ sharedSecret: SharedSecret) throws {
+
+        var storedInfo = try getExistingSharedSecrets() ?? []
+        
+        if let existingIndex = storedInfo
+            .firstIndex(
+                where: {
+                    $0.publicKey == sharedSecret.publicKey &&
+                        $0.otherPublicKey == sharedSecret.otherPublicKey
+                }
+            ) {
+            storedInfo[existingIndex] = sharedSecret
+        } else {
+            storedInfo.append(sharedSecret)
+        }
+        
+        let storedData = try JSONEncoder().encode(storedInfo)
+        try set(storedData, key: StorableKeys.sharedSecrets.rawValue)
+    }
+    
+    
+    func getSharedSecret(for myPublicKey: String, and otherPublicKey: String) throws -> SharedSecret? {
+        let sharedSecrets = try getAllSharedSecrets()
+        return sharedSecrets
+            .first(where: { $0.publicKey == myPublicKey && $0.otherPublicKey == otherPublicKey })
+    }
+    
+    func getSharedSecrets(for myPublicKey: String, and otherPublicKeys: [String]) throws -> [SharedSecret]? {
+        let sharedSecrets = try getAllSharedSecrets()
+        
+        var foundSecrets = [SharedSecret]()
+        for otherPublicKey in otherPublicKeys {
+            if let secret = sharedSecrets.first(where: { $0.publicKey == myPublicKey && $0.otherPublicKey == otherPublicKey }) {
+                foundSecrets.append(secret)
+            } else {
+                throw DeSoIdentityError.error(message: "Not all shared keys where found")
+            }
+        }
+        
+        return foundSecrets
+    }
+    
+    func getAllSharedSecrets() throws -> [SharedSecret] {
+        guard let data = try DeSoIdentity.keychain.getData(StorableKeys.sharedSecrets.rawValue) else { return [] }
+        let storedData = try JSONDecoder().decode([SharedSecret].self, from: data)
+        return storedData
+    }
+    
+    private func getExistingSharedSecrets() throws -> [SharedSecret]? {
+        guard let data = try getData(StorableKeys.sharedSecrets.rawValue) else {
+            return [SharedSecret]()
+        }
+        if let decodedData = try? JSONDecoder().decode([SharedSecret].self, from: data) {
+            return decodedData
+        }
+        return [SharedSecret]()
+    }
+    
+    private mutating func setSharedSecretsOnKeychain(_ secrets: [SharedSecret]) throws {
+        let keychainData = try JSONEncoder().encode(secrets)
+        try DeSoIdentity.keychain.set(keychainData, key: StorableKeys.sharedSecrets.rawValue)
     }
 }

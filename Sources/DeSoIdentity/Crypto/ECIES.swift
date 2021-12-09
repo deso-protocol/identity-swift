@@ -207,9 +207,9 @@ func decryptShared(privateKeyRecipient: [UInt8], publicKeySender: [UInt8], encry
     return try decryptShared(sharedPx: sharedPx, encrypted: encrypted)
 }
 
-func decryptShared(sharedPx: [UInt8], encrypted: [UInt8]) throws -> [UInt8] {
+func decryptShared(sharedPx: [UInt8], encrypted: [UInt8], legacy: Bool = false) throws -> [UInt8] {
     let sharedPrivateKey = kdf(secret: sharedPx, outputLength: 32)
-    return try decrypt(privateKey: sharedPrivateKey, encrypted: encrypted)
+    return try decrypt(privateKey: sharedPrivateKey, encrypted: encrypted, legacy: legacy)
 }
 
 /**

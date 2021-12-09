@@ -72,7 +72,7 @@ public struct DeSoIdentity {
             }
 
             // Authorize Derived Keys
-            let derivedKeyInfo = try await ASWebAuthenticationSession.startSession(url: url, callbackURLScheme: callbackScheme)
+            let derivedKeyInfo = try await ASWebAuthenticationSession.startDerivedKeySession(url: url, callbackURLScheme: callbackScheme)
             
             // Check user balance
             let userState: UsersStatelessResponse = try await post(UsersStatelessRequest(publicKey: derivedKeyInfo.publicKey))
@@ -182,6 +182,38 @@ public struct DeSoIdentity {
     public static func signAndSumbit(_ unsignedTransaction: UnsignedTransaction) async throws -> SubmitTransactionResponse {
         let signed = try await signWithAppendedDerivedKey(unsignedTransaction: unsignedTransaction)
         return try await submitTransaction(signedHex: signed)
+    }
+    
+    /// Decrypts messages
+    ///
+    /// This function will decrypt message threads. If any of the shared secrets are not already
+    /// stored it will pull up the DeSo Identity authentication window briefly.
+    ///
+    ///
+    /// - Parameters:
+    ///   - encryptedMessageThreads: ``[EncryptedMessagesThread]``
+    ///   - forPublicKey: `String`
+    ///
+    /// - Returns: `[String: [String]]`
+    ///
+    /// - Throws: ``DeSoIdentityError``
+    public static func decryptThreads(_ encryptedMessageThreads: [EncryptedMessagesThread], forPublicKey: String, shouldThrow: Bool) async throws -> [String: [String]] {
+        
+        if encryptedMessageThreads.first(where: { $0.publicKey != forPublicKey }) != nil {
+            throw DeSoIdentityError.error(message: "PublicKey mismatch")
+        }
+        
+        let otherPublicKeys = Array(Set(encryptedMessageThreads.map({ $0.otherPublicKey })))
+        let _ = try await getSharedSecrets(forPublicKey, messagePublicKeys: otherPublicKeys)
+
+        return try encryptedMessageThreads.reduce(into: [:], { res, this in
+            do {
+                res[this.otherPublicKey] = try decryptThread(this, shouldThrow: shouldThrow)
+            } catch {
+                throw error
+            }
+        })
+        
     }
     
 }

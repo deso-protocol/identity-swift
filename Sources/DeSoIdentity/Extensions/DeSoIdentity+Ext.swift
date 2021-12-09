@@ -7,6 +7,7 @@
 
 import Foundation
 import KeychainAccess
+import AuthenticationServices
 
 internal protocol PostRequest: Codable {
     static var endpoint: URL { get }
@@ -61,6 +62,82 @@ internal extension DeSoIdentity {
         
         return try signTransaction(seedHex: derivedKeyInfo.derivedSeedHex, transactionHex: response.transactionHex)
         
+    }
+    
+    static func getSharedSecrets(_ publicKey: String, messagePublicKeys publicKeys: [String]) async throws -> [SharedSecret] {
+        
+        var messagePublicKeys = Array(Set(publicKeys))
+        messagePublicKeys.sort(by: { $0 < $1 })
+        
+        if let storedSharedSecrets = try? keychain.getSharedSecrets(for: publicKey, and: publicKeys) {
+            return storedSharedSecrets
+        } else if let derivedKeyInfo = try? keychain.getDerivedKeyInfo(for: publicKey), messagePublicKeys.count > 0 {
+
+            let ownerPublicKey = publicKey
+            let derivedPublicKey = derivedKeyInfo.derivedPublicKey
+            let derivedJWT = derivedKeyInfo.derivedJwt
+
+            let callbackScheme = (Bundle.main.bundleIdentifier ?? UUID().uuidString) + ".identity"
+            var components = URLComponents(string: baseIdentityURL.appendingPathComponent("get-shared-secrets").absoluteString)
+            components?.queryItems = [
+                URLQueryItem(name: "callback", value: "\(callbackScheme)://"),
+                URLQueryItem(name: "webview", value: "true"),
+                URLQueryItem(name: "ownerPublicKey", value: ownerPublicKey),
+                URLQueryItem(name: "derivedPublicKey", value: derivedPublicKey),
+                URLQueryItem(name: "JWT", value: derivedJWT),
+                URLQueryItem(name: "messagePublicKeys", value: messagePublicKeys.joined(separator: ","))
+            ]
+
+            guard let url = components?.url else {
+                throw DeSoIdentityError.unableToFormIdentityUrl
+            }
+
+            // Get Shared Secrets
+            let secrets = try await ASWebAuthenticationSession.startGetSharedSecretsSession(url: url, callbackURLScheme: callbackScheme)
+            if messagePublicKeys.count == secrets.count {
+                
+                var sharedSecrets = [SharedSecret]()
+                for (i, secret) in secrets.enumerated() {
+                    let sharedSecret = SharedSecret(secret: secret, publicKey: publicKey, otherPublicKey: messagePublicKeys[i])
+                    try keychain.store(sharedSecret)
+                    sharedSecrets.append(sharedSecret)
+                }
+                
+                return sharedSecrets
+                
+            } else {
+                throw DeSoIdentityError.error(message: "Publickey count doesnt match number of shared secrets returned")
+            }
+
+        } else {
+            
+            throw DeSoIdentityError.noDerivedKeyInfoFound
+
+        }
+
+    }
+    
+    static func decryptThread(_ thread: EncryptedMessagesThread, shouldThrow: Bool) throws -> [String] {
+        guard let sharedSecret = try? DeSoIdentity.keychain.getSharedSecret(for: thread.publicKey, and: thread.otherPublicKey) else {
+            throw DeSoIdentityError.missingSharedSecret
+        }
+        var decrypted: [String] = []
+        do {
+            decrypted = try DeSoIdentity.decrypt(messages: thread.encryptedMessages, with: sharedSecret)
+        } catch {
+            if shouldThrow {
+                throw error
+            }
+            print(error)
+        }
+        return decrypted
+    }
+    
+    static func decrypt(messages: [EncryptedMessagesThread.EncryptedText], with secret: SharedSecret) throws -> [String] {
+        return try messages.compactMap {
+            return try decryptShared(sharedPx: Data(hex: secret.secret).bytes,
+                                     encrypted: Data(hex: $0.message).bytes, legacy: !$0.v2).stringValue
+        }
     }
     
     static func post<T: PostRequest, R: Decodable>(_ request: T) async throws -> R {

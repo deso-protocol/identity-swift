@@ -20,7 +20,7 @@ public enum DeSoIdentityError: LocalizedError {
 //    case notLoggedIn
 //    case missingInfoForPublicKey
 //    case keyInfoExpired
-//    case missingSharedSecret
+    case missingSharedSecret
 //    case signatureNotAString
 //    case nodeNotSpecified
 //    case derivedKeyExpired
