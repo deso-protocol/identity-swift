@@ -198,8 +198,7 @@ public struct DeSoIdentity {
     ///
     /// - Throws: ``DeSoIdentityError``
     public static func decryptThreads(_ encryptedMessageThreads: [EncryptedMessagesThread], forPublicKey: String, shouldThrow: Bool) async throws -> [String: [String]] {
-        
-        
+
         if encryptedMessageThreads.first(where: { $0.publicKey != forPublicKey }) != nil {
             throw DeSoIdentityError.error(message: "PublicKey mismatch")
         }
@@ -209,6 +208,13 @@ public struct DeSoIdentity {
 
         return try encryptedMessageThreads.reduce(into: [:], { res, this in
             do {
+                
+                let message = try decryptThread(this, shouldThrow: shouldThrow)
+                
+                if res[this.otherPublicKey] == nil {
+                    res[this.otherPublicKey] = message
+                }
+                
                 res[this.otherPublicKey] = try decryptThread(this, shouldThrow: shouldThrow)
             } catch {
                 if shouldThrow {
