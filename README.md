@@ -2,10 +2,10 @@
 
 This library is currently a work in progress.
 
-[x] Login/Logout with DeSo Identity
-[x] Derived Key managament
-[x] Sign & Submit Transacitons with Derived Keys
-[ ] Message Encrypt/Decrypt (Work in progress) 
+[x] Login/Logout with DeSo Identity  
+[x] Derived Key managament  
+[x] Sign & Submit Transacitons with Derived Keys  
+[ ] Message Encrypt/Decrypt (Work in progress)  
 
 ## Installation
 
