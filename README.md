@@ -2,12 +2,17 @@
 
 This library is currently a work in progress.
 
-[x] Login/Logout with DeSo Identity  
-[x] Derived Key managament  
-[x] Sign & Submit Transacitons with Derived Keys  
-[ ] Message Encrypt/Decrypt (Work in progress)  
+- [x] Login/Logout with DeSo Identity  
+- [x] Derived Key managament  
+- [x] Sign & Submit Transacitons with Derived Keys  
+- [ ] Message Encrypt/Decrypt (Work in progress)  
+  
+- [x] iOS 13+  
+- [x] macOS 10.5+  
 
 ## Installation
+
+XCode 13.2+ is required for this library. This is due to the fact that we used the backported swift concurrency features. This allows you to use async await with iOS 13+ and macOS 10.5+  
 
 DeSoIdentity is available through [Swift Package Manager](https://www.swift.org/package-manager/). Add DeSoIdentity as a dependency to your Package.swift. For more information, please see the [Swift Package Manager](https://www.swift.org/package-manager/) documentation.
 
