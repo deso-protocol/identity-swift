@@ -115,6 +115,7 @@ public struct DeSoIdentity {
         
         if let derivedKeyInfo = try? keychain.getDerivedKeyInfo(for: publicKey) {
             try keychain.clearDerivedKeyInfo(for: publicKey)
+            try? keychain.clearSharedSecrets()
             let deAuthorizeDerivedKeyResposne = try await authorizeDerivedKey(with: derivedKeyInfo, deauth: true)
             let signed = try signTransaction(seedHex: derivedKeyInfo.derivedSeedHex, transactionHex: deAuthorizeDerivedKeyResposne.transactionHex)
             let _ = try await submitTransaction(signedHex: signed)

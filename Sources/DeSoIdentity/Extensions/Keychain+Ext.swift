@@ -161,6 +161,10 @@ extension DataStorable {
         return foundSecrets
     }
     
+    mutating func clearSharedSecrets() throws {
+        try remove(StorableKeys.sharedSecrets.rawValue)
+    }
+    
     func getAllSharedSecrets() throws -> [SharedSecret] {
         guard let data = try DeSoIdentity.keychain.getData(StorableKeys.sharedSecrets.rawValue) else { return [] }
         let storedData = try JSONDecoder().decode([SharedSecret].self, from: data)
