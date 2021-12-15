@@ -144,7 +144,7 @@ internal extension DeSoIdentity {
             
             let req = try buildPostRequest(request: request)
             let (data, res): (Data, URLResponse)
-            if #available(iOS 15.0, *) {
+            if #available(iOS 15.0, macOS 12.0, *) {
                 (data, res) = try await session.data(for: req)
             } else {
                 (data, res) = try await session.data(with: req)
@@ -176,7 +176,7 @@ internal extension DeSoIdentity {
     static func get<R: Decodable>(url: URL) async throws -> R {
         do {
             let (data, res): (Data, URLResponse)
-            if #available(iOS 15.0, *) {
+            if #available(iOS 15.0, macOS 12.0, *) {
                 (data, res) = try await session.data(for: URLRequest(url: url))
             } else {
                 (data, res) = try await session.data(with: URLRequest(url: url))

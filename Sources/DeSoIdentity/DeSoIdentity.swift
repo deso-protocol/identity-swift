@@ -205,23 +205,20 @@ public struct DeSoIdentity {
         
         let otherPublicKeys = Array(Set(encryptedMessageThreads.map({ $0.otherPublicKey })))
         let _ = try await getSharedSecrets(forPublicKey, messagePublicKeys: otherPublicKeys)
-
-        return try encryptedMessageThreads.reduce(into: [:], { res, this in
+        
+        var messages = [String: [String]]()
+        for thread in encryptedMessageThreads {
             do {
-                
-                let message = try decryptThread(this, shouldThrow: shouldThrow)
-                
-                if res[this.otherPublicKey] == nil {
-                    res[this.otherPublicKey] = message
-                }
-                
-                res[this.otherPublicKey] = try decryptThread(this, shouldThrow: shouldThrow)
+                let m = try decryptThread(thread, shouldThrow: false)
+                messages[thread.otherPublicKey] = m
             } catch {
                 if shouldThrow {
                     throw error
                 }
             }
-        })
+        }
+        
+        return messages
         
     }
     

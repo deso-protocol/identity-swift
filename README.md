@@ -18,3 +18,7 @@ DeSoIdentity is available through [Swift Package Manager](https://www.swift.org/
 Usage examples to come soon. For now you can take a look at the documentation built into each of the major functions.
 
 All public functions live on the static class **DeSoIdentity**.
+
+###Important Note###
+
+We use CryptoSwift in this library and is and since Swift Package Manager uses debug there known performance issue when running under debug builds. You will see this when trying to encyrpt/decrypt messages. To overcome this you can set your build to release mode while testing encrypt/decrypting messages. Of course, when you release this will not be an issue.
